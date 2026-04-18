@@ -68,7 +68,7 @@ L'API utilise JWT (JSON Web Token).
 
 ## Comptes formateur (developpement)
 
-| Email | Mot de passe | Role |
-| --- | --- | --- |
-| formateur@test.com | 123456 | FORMATEUR |
-| emma.laurent@gmail.com | 123456 | FORMATEUR |
+| Email                  | Mot de passe | Role      |
+| ---------------------- | ------------ | --------- |
+| formateur@test.com     | 123456       | FORMATEUR |
+| emma.laurent@gmail.com | 123456       | FORMATEUR |

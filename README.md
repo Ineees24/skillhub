@@ -14,7 +14,6 @@ Racine du projet pour le backend et le frontend SkillHub.
 Configurez ces secrets du depot avant d'activer le workflow :
 
 - `SONAR_TOKEN`
-- `SONAR_HOST_URL`
 
 ## Docker
 
