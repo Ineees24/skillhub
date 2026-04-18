@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Formation extends Model
 {
     use HasFactory;
-    
+
     protected $table = 'formation';
 
     protected $fillable = [
@@ -16,9 +16,8 @@ class Formation extends Model
         'description',
         'duree',
         'prix',
-        'niveauRequis', 
-        'statut',      
-        'vues', 
+        'niveauRequis',
+        'vues',
         'idUtilisateur',
         'idCategorie',
     ];
