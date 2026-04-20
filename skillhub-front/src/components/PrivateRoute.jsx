@@ -1,4 +1,5 @@
 import { Navigate } from 'react-router-dom'
+import PropTypes from 'prop-types'
 import { getToken, getUser } from '../services/authService'
 
 function PrivateRoute({ children, role }) {
@@ -15,6 +16,15 @@ function PrivateRoute({ children, role }) {
     }
 
     return children
+}
+
+PrivateRoute.propTypes = {
+    children: PropTypes.node.isRequired,
+    role: PropTypes.string,
+}
+
+PrivateRoute.defaultProps = {
+    role: null,
 }
 
 export default PrivateRoute
