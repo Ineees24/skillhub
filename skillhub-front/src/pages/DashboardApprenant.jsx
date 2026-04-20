@@ -9,7 +9,6 @@ import {
 import { getCategoryVisualByKey } from "../utils/categoryVisuals";
 import "./Dashboard.css";
 
-// Fallback local si l'API est indisponible
 const fallbackApprenantFormations = [
   {
     id: 1,
@@ -163,10 +162,8 @@ function DashboardApprenant() {
     };
   }, []);
 
-  // Filtrer les formations
   const filteredFormations = useMemo(() => {
     return formations.filter((formation) => {
-      // Recherche textuelle
       if (
         search &&
         !formation.titre.toLowerCase().includes(search.toLowerCase()) &&
@@ -175,7 +172,6 @@ function DashboardApprenant() {
         return false;
       }
 
-      // Filtre catégorie
       if (
         selectedCategories.length > 0 &&
         !selectedCategories.includes(formation.categorie)
@@ -183,7 +179,6 @@ function DashboardApprenant() {
         return false;
       }
 
-      // Filtre durée
       if (
         selectedDurations.length > 0 &&
         !selectedDurations.includes(formation.duree.toString())
@@ -191,7 +186,6 @@ function DashboardApprenant() {
         return false;
       }
 
-      // Filtre prix
       if (selectedPrices.length > 0) {
         const priceMatch = selectedPrices.some((range) => {
           if (range === "0-50")
@@ -206,7 +200,6 @@ function DashboardApprenant() {
         if (!priceMatch) return false;
       }
 
-      // Filtre statut
       if (
         selectedStatuts.length > 0 &&
         !selectedStatuts.includes(formation.statut)
@@ -235,13 +228,17 @@ function DashboardApprenant() {
 
   const handleDurationChange = (duree) => {
     setSelectedDurations((prev) =>
-      prev.includes(duree) ? prev.filter((d) => d !== duree) : [...prev, duree],
+      prev.includes(duree)
+        ? prev.filter((d) => d !== duree)
+        : [...prev, duree],
     );
   };
 
   const handlePriceChange = (price) => {
     setSelectedPrices((prev) =>
-      prev.includes(price) ? prev.filter((p) => p !== price) : [...prev, price],
+      prev.includes(price)
+        ? prev.filter((p) => p !== price)
+        : [...prev, price],
     );
   };
 
@@ -266,7 +263,7 @@ function DashboardApprenant() {
   };
 
   const handleNePlusSuivre = (id) => {
-    const ok = window.confirm(
+    const ok = globalThis.confirm(
       "Voulez-vous vraiment ne plus suivre cette formation ?",
     );
     if (!ok) return;
@@ -277,7 +274,7 @@ function DashboardApprenant() {
       .catch((err) => {
         const msg =
           err.response?.data?.message || "Erreur lors de la désinscription.";
-        alert(msg);
+        globalThis.alert(msg);
       });
   };
 
@@ -297,7 +294,7 @@ function DashboardApprenant() {
         <div className="container">
           <h1 className="dashboard-title">
             <i className="fa-solid fa-user-graduate" aria-hidden="true"></i>
-            Tableau de bord Apprenant
+            {" "}Tableau de bord Apprenant
           </h1>
           <nav className="dashboard-nav">
             <Link to="/apprenant" className="active">
@@ -308,13 +305,9 @@ function DashboardApprenant() {
       </header>
 
       <div className="container dashboard-content">
-        {/* Statistiques */}
         <div className="dashboard-stats">
           <div className="stat-card">
-            <i
-              className="fa-solid fa-book-open stat-icon"
-              aria-hidden="true"
-            ></i>
+            <i className="fa-solid fa-book-open stat-icon" aria-hidden="true"></i>
             <h3>{stats.total}</h3>
             <p>Formations totales</p>
           </div>
@@ -324,24 +317,17 @@ function DashboardApprenant() {
             <p>En cours</p>
           </div>
           <div className="stat-card">
-            <i
-              className="fa-solid fa-circle-check stat-icon"
-              aria-hidden="true"
-            ></i>
+            <i className="fa-solid fa-circle-check stat-icon" aria-hidden="true"></i>
             <h3>{stats.termine}</h3>
             <p>Terminées</p>
           </div>
           <div className="stat-card">
-            <i
-              className="fa-solid fa-chart-line stat-icon"
-              aria-hidden="true"
-            ></i>
-            <h3>{stats.progressionMoyenne}%</h3>
+            <i className="fa-solid fa-chart-line stat-icon" aria-hidden="true"></i>
+            <h3>{stats.progressionMoyenne}{" "}%</h3>
             <p>Progression moyenne</p>
           </div>
         </div>
 
-        {/* Barre de recherche */}
         <div className="search-section">
           <input
             type="text"
@@ -353,7 +339,6 @@ function DashboardApprenant() {
         </div>
 
         <div className="dashboard-layout">
-          {/* Filtres */}
           <aside className="filters-sidebar">
             <h2>Filtres</h2>
 
@@ -364,7 +349,7 @@ function DashboardApprenant() {
                   type="checkbox"
                   checked={selectedStatuts.includes("en-cours")}
                   onChange={() => handleStatutChange("en-cours")}
-                />
+                />{" "}
                 En cours
               </label>
               <label>
@@ -372,7 +357,7 @@ function DashboardApprenant() {
                   type="checkbox"
                   checked={selectedStatuts.includes("termine")}
                   onChange={() => handleStatutChange("termine")}
-                />
+                />{" "}
                 Terminé
               </label>
             </div>
@@ -385,7 +370,7 @@ function DashboardApprenant() {
                     type="checkbox"
                     checked={selectedCategories.includes(key)}
                     onChange={() => handleCategoryChange(key)}
-                  />
+                  />{" "}
                   {label}
                 </label>
               ))}
@@ -399,8 +384,8 @@ function DashboardApprenant() {
                     type="checkbox"
                     checked={selectedDurations.includes(duree.toString())}
                     onChange={() => handleDurationChange(duree.toString())}
-                  />
-                  {duree} heures
+                  />{" "}
+                  {duree}{" "}heures
                 </label>
               ))}
             </div>
@@ -413,7 +398,7 @@ function DashboardApprenant() {
                     type="checkbox"
                     checked={selectedPrices.includes(range.value)}
                     onChange={() => handlePriceChange(range.value)}
-                  />
+                  />{" "}
                   {range.label}
                 </label>
               ))}
@@ -424,13 +409,12 @@ function DashboardApprenant() {
             </button>
           </aside>
 
-          {/* Liste des formations */}
           <main className="formations-list">
             <div className="results-header">
               <p>
-                {filteredFormations.length} formation
-                {filteredFormations.length > 1 ? "s" : ""} trouvée
-                {filteredFormations.length > 1 ? "s" : ""}
+                {filteredFormations.length}{" "}
+                formation{filteredFormations.length > 1 ? "s" : ""}{" "}
+                trouvée{filteredFormations.length > 1 ? "s" : ""}
               </p>
               {loading && <p>Chargement des formations...</p>}
               {!loading && apiError && (
@@ -458,7 +442,7 @@ function DashboardApprenant() {
                           className={`${getCategoryVisualByKey(formation.categorie).icon} meta-icon`}
                           aria-hidden="true"
                         ></i>
-                        {categories[formation.categorie]}
+                        {" "}{categories[formation.categorie]}
                       </span>
                     </div>
 
@@ -473,7 +457,7 @@ function DashboardApprenant() {
                           className="fa-solid fa-clock meta-icon"
                           aria-hidden="true"
                         ></i>
-                        {formation.duree}h
+                        {" "}{formation.duree}h
                       </span>
                       <span className="formation-price">{formation.prix}€</span>
                     </div>
@@ -492,9 +476,7 @@ function DashboardApprenant() {
 
                     <p className="formation-date">
                       Inscrit le{" "}
-                      {new Date(formation.dateInscription).toLocaleDateString(
-                        "fr-FR",
-                      )}
+                      {new Date(formation.dateInscription).toLocaleDateString("fr-FR")}
                     </p>
 
                     <div className="formation-actions">
