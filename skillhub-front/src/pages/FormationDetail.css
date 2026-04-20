@@ -102,18 +102,6 @@
   animation: float 8s ease-in-out infinite 1s;
 }
 
-@keyframes float {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
 .fd-badge {
   display: inline-block;
   padding: 8px 16px;
@@ -145,7 +133,7 @@
   margin: 0 0 32px;
   font-size: 1.05rem;
   line-height: 1.7;
-  color: #a8a0b8;
+  color: #c4bdd4;
   max-width: 70ch;
   font-weight: 500;
 }
@@ -180,7 +168,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #7a717d;
+  color: #9d96a0;
 }
 
 .fd-stat-value {
@@ -284,7 +272,7 @@
   padding: 32px 24px;
   text-align: center;
   font-size: 0.95rem;
-  color: #7a717d;
+  color: #9d96a0;
   background: rgba(168, 85, 247, 0.08);
   border: 2px dashed #3f3747;
   border-radius: 12px;
@@ -304,7 +292,7 @@
   margin: 0 0 20px;
   font-size: 0.98rem;
   line-height: 1.7;
-  color: #a8a0b8;
+  color: #c4bdd4;
   font-weight: 500;
 }
 
@@ -344,7 +332,7 @@
 
 .fd-empty-state p {
   margin: 0 0 28px;
-  color: #a8a0b8;
+  color: #c4bdd4;
   line-height: 1.7;
   font-weight: 500;
 }
@@ -377,9 +365,6 @@
     padding: 40px 24px;
   }
 }
-
-
-
 
 .fd-suivi-bar {
   position: sticky;
@@ -460,7 +445,7 @@
 
 .fd-progress-caption {
   font-size: 0.9rem;
-  color: #6b7280;
+  color: #9d96a0;
 }
 
 .fd-progress-track {
