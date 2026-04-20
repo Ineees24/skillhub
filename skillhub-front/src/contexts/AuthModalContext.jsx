@@ -5,6 +5,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import PropTypes from "prop-types";
 import AuthModals from "../components/AuthModals";
 import { getUser } from "../services/authService";
 
@@ -58,6 +59,10 @@ export function AuthModalProvider({ children }) {
     </AuthModalContext.Provider>
   );
 }
+
+AuthModalProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 export function useAuthModal() {
   const ctx = useContext(AuthModalContext);
