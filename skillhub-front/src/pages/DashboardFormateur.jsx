@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import PropTypes from "prop-types";
 import { Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import api from "../services/axios";
@@ -27,6 +28,7 @@ const emptyForm = {
 
 function ModalFormation({ formation, categories, onClose, onSave }) {
   const isEdit = !!formation;
+  const fieldPrefix = isEdit ? "formation-edit" : "formation-create";
   const [form, setForm] = useState(
     isEdit
       ? {
@@ -64,6 +66,7 @@ function ModalFormation({ formation, categories, onClose, onSave }) {
       onSave(data, isEdit);
       onClose();
     } catch (err) {
+      console.error("Erreur lors de l'enregistrement de la formation", err);
       setError(
         isEdit
           ? "Erreur lors de la modification"
@@ -75,8 +78,8 @@ function ModalFormation({ formation, categories, onClose, onSave }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay">
+      <div className="modal-content">
         <div className="modal-header">
           <h2>{isEdit ? "Modifier la formation" : "Nouvelle formation"}</h2>
           <button className="modal-close" onClick={onClose} aria-label="Fermer">
@@ -88,8 +91,9 @@ function ModalFormation({ formation, categories, onClose, onSave }) {
 
         <div className="modal-body">
           <div className="form-group">
-            <label>Titre *</label>
+            <label htmlFor={`${fieldPrefix}-titre`}>Titre *</label>
             <input
+              id={`${fieldPrefix}-titre`}
               name="titre"
               value={form.titre}
               onChange={handleChange}
@@ -97,8 +101,9 @@ function ModalFormation({ formation, categories, onClose, onSave }) {
             />
           </div>
           <div className="form-group">
-            <label>Description</label>
+            <label htmlFor={`${fieldPrefix}-description`}>Description</label>
             <textarea
+              id={`${fieldPrefix}-description`}
               name="description"
               value={form.description}
               onChange={handleChange}
@@ -108,8 +113,9 @@ function ModalFormation({ formation, categories, onClose, onSave }) {
           </div>
           <div className="form-row">
             <div className="form-group">
-              <label>Durée (heures)</label>
+              <label htmlFor={`${fieldPrefix}-duree`}>Durée (heures)</label>
               <input
+                id={`${fieldPrefix}-duree`}
                 name="duree"
                 type="number"
                 min="1"
@@ -119,8 +125,9 @@ function ModalFormation({ formation, categories, onClose, onSave }) {
               />
             </div>
             <div className="form-group">
-              <label>Prix (€)</label>
+              <label htmlFor={`${fieldPrefix}-prix`}>Prix (€)</label>
               <input
+                id={`${fieldPrefix}-prix`}
                 name="prix"
                 type="number"
                 min="0"
@@ -131,8 +138,9 @@ function ModalFormation({ formation, categories, onClose, onSave }) {
             </div>
           </div>
           <div className="form-group">
-            <label>Niveau requis</label>
+            <label htmlFor={`${fieldPrefix}-niveauRequis`}>Niveau requis</label>
             <select
+              id={`${fieldPrefix}-niveauRequis`}
               name="niveauRequis"
               value={form.niveauRequis}
               onChange={handleChange}
@@ -145,8 +153,9 @@ function ModalFormation({ formation, categories, onClose, onSave }) {
             </select>
           </div>
           <div className="form-group">
-            <label>Catégorie</label>
+            <label htmlFor={`${fieldPrefix}-idCategorie`}>Catégorie</label>
             <select
+              id={`${fieldPrefix}-idCategorie`}
               name="idCategorie"
               value={form.idCategorie}
               onChange={handleChange}
@@ -160,8 +169,13 @@ function ModalFormation({ formation, categories, onClose, onSave }) {
             </select>
           </div>
           <div className="form-group">
-            <label>Statut</label>
-            <select name="statut" value={form.statut} onChange={handleChange}>
+            <label htmlFor={`${fieldPrefix}-statut`}>Statut</label>
+            <select
+              id={`${fieldPrefix}-statut`}
+              name="statut"
+              value={form.statut}
+              onChange={handleChange}
+            >
               <option value="brouillon">Brouillon</option>
               <option value="publié">Publié</option>
             </select>
@@ -172,18 +186,54 @@ function ModalFormation({ formation, categories, onClose, onSave }) {
           <button className="btn-cancel" onClick={onClose}>
             Annuler
           </button>
-          <button className="btn-save" onClick={handleSubmit} disabled={saving}>
-            {saving
-              ? "Enregistrement..."
-              : isEdit
-                ? "Enregistrer"
-                : "Créer la formation"}
-          </button>
+          {(() => {
+            let saveButtonLabel = "Créer la formation";
+            if (saving) {
+              saveButtonLabel = "Enregistrement...";
+            } else if (isEdit) {
+              saveButtonLabel = "Enregistrer";
+            }
+
+            return (
+              <button
+                className="btn-save"
+                onClick={handleSubmit}
+                disabled={saving}
+              >
+                {saveButtonLabel}
+              </button>
+            );
+          })()}
         </div>
       </div>
     </div>
   );
 }
+
+ModalFormation.propTypes = {
+  formation: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+    titre: PropTypes.string,
+    description: PropTypes.string,
+    duree: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    prix: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    niveauRequis: PropTypes.string,
+    idCategorie: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    statut: PropTypes.string,
+  }),
+  categories: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+      nomCategorie: PropTypes.string.isRequired,
+    }),
+  ).isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
+};
+
+ModalFormation.defaultProps = {
+  formation: null,
+};
 
 function ModalModules({ formation, onClose }) {
   const [modules, setModules] = useState([]);
@@ -196,20 +246,21 @@ function ModalModules({ formation, onClose }) {
     contenu: "",
   });
 
-  const fetchModules = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await api.get(`/formations/${formation.id}/modules`);
-      setModules(Array.isArray(res.data) ? res.data : []);
-    } catch (e) {
-      setError("Impossible de charger les modules.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchModules = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await api.get(`/formations/${formation.id}/modules`);
+        setModules(Array.isArray(res.data) ? res.data : []);
+      } catch (e) {
+        console.error("Impossible de charger les modules", e);
+        setError("Impossible de charger les modules.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchModules();
   }, [formation.id]);
 
@@ -233,15 +284,34 @@ function ModalModules({ formation, onClose }) {
       setModules((prev) => [...prev, res.data]);
       setForm({ titre: "", duree: "", contenu: "" });
     } catch (e) {
+      console.error("Erreur lors de l'ajout du module", e);
       setError("Erreur lors de l ajout du module.");
     } finally {
       setSaving(false);
     }
   };
 
+  let modulesContent = <p>Chargement...</p>;
+  if (!loading) {
+    if (modules.length === 0) {
+      modulesContent = <p>Aucun module pour cette formation.</p>;
+    } else {
+      modulesContent = (
+        <ul className="detail-list">
+          {modules.map((m) => (
+            <li key={m.id}>
+              <strong>{m.titre}</strong>
+              {m.duree ? ` - ${m.duree} min` : ""}
+            </li>
+          ))}
+        </ul>
+      );
+    }
+  }
+
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay">
+      <div className="modal-content">
         <div className="modal-header">
           <h2>Modules - {formation.titre}</h2>
           <button className="modal-close" onClick={onClose} aria-label="Fermer">
@@ -253,8 +323,9 @@ function ModalModules({ formation, onClose }) {
 
         <div className="modal-body">
           <div className="form-group">
-            <label>Titre du module *</label>
+            <label htmlFor="module-titre">Titre du module *</label>
             <input
+              id="module-titre"
               value={form.titre}
               onChange={(e) =>
                 setForm((p) => ({ ...p, titre: e.target.value }))
@@ -263,8 +334,9 @@ function ModalModules({ formation, onClose }) {
             />
           </div>
           <div className="form-group">
-            <label>Durée (minutes)</label>
+            <label htmlFor="module-duree">Durée (minutes)</label>
             <input
+              id="module-duree"
               type="number"
               min="1"
               value={form.duree}
@@ -275,8 +347,9 @@ function ModalModules({ formation, onClose }) {
             />
           </div>
           <div className="form-group">
-            <label>Contenu pédagogique</label>
+            <label htmlFor="module-contenu">Contenu pédagogique</label>
             <textarea
+              id="module-contenu"
               rows={3}
               value={form.contenu}
               onChange={(e) =>
@@ -297,25 +370,20 @@ function ModalModules({ formation, onClose }) {
           <hr style={{ borderColor: "#374151", width: "100%" }} />
 
           <h3 style={{ marginBottom: "8px" }}>Liste des modules</h3>
-          {loading ? (
-            <p>Chargement...</p>
-          ) : modules.length === 0 ? (
-            <p>Aucun module pour cette formation.</p>
-          ) : (
-            <ul className="detail-list">
-              {modules.map((m) => (
-                <li key={m.id}>
-                  <strong>{m.titre}</strong>
-                  {m.duree ? ` - ${m.duree} min` : ""}
-                </li>
-              ))}
-            </ul>
-          )}
+          {modulesContent}
         </div>
       </div>
     </div>
   );
 }
+
+ModalModules.propTypes = {
+  formation: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+    titre: PropTypes.string,
+  }).isRequired,
+  onClose: PropTypes.func.isRequired,
+};
 
 function DashboardFormateur() {
   const navigate = useNavigate();
@@ -351,18 +419,23 @@ function DashboardFormateur() {
   }, []);
 
   const handleLogout = async () => {
-    await logout();
-    navigate("/");
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Erreur lors de la deconnexion", error);
+    }
   };
 
   const handleDelete = async (id) => {
     if (
-      window.confirm("Êtes-vous sûr de vouloir supprimer cette formation ?")
+      globalThis.confirm("Êtes-vous sûr de vouloir supprimer cette formation ?")
     ) {
       try {
         await api.delete(`/formations/${id}`);
         setFormations((prev) => prev.filter((f) => f.id !== id));
       } catch (err) {
+        console.error("Erreur lors de la suppression de la formation", err);
         alert("Erreur lors de la suppression");
       }
     }
@@ -425,6 +498,134 @@ function DashboardFormateur() {
     selectedPrices,
   ]);
 
+  const foundFormationsLabel = `${filteredFormations.length} formation${
+    filteredFormations.length > 1 ? "s" : ""
+  } trouvée${filteredFormations.length > 1 ? "s" : ""}`;
+
+  const toggleCategory = (categoryId) => {
+    setSelectedCategories((prev) => {
+      if (prev.includes(categoryId)) {
+        return prev.filter((value) => value !== categoryId);
+      }
+
+      return [...prev, categoryId];
+    });
+  };
+
+  const toggleDuration = (duration) => {
+    setSelectedDurations((prev) => {
+      if (prev.includes(duration)) {
+        return prev.filter((value) => value !== duration);
+      }
+
+      return [...prev, duration];
+    });
+  };
+
+  const togglePrice = (priceRange) => {
+    setSelectedPrices((prev) => {
+      if (prev.includes(priceRange)) {
+        return prev.filter((value) => value !== priceRange);
+      }
+
+      return [...prev, priceRange];
+    });
+  };
+
+  const resetFilters = () => {
+    setSearch("");
+    setSelectedCategories([]);
+    setSelectedDurations([]);
+    setSelectedPrices([]);
+  };
+
+  let formationsContent = (
+    <div className="formations-grid">
+      {filteredFormations.map((formation) => (
+        <div key={formation.id} className="formation-card">
+          <div className="formation-header">
+            <span className={`badge badge-${formation.statut}`}>
+              {formation.statut === "publié" ? "Publié" : "Brouillon"}
+            </span>
+            <span className="formation-category">
+              <i
+                className={`${getCategoryIconByName(formation.categorie?.nomCategorie)} meta-icon`}
+                aria-hidden="true"
+              ></i>
+              {formation.categorie?.nomCategorie || "Non classe"}
+            </span>
+          </div>
+          <h3>{formation.titre}</h3>
+          <p className="formation-description">{formation.description}</p>
+          <div className="formation-meta">
+            <span>
+              <i className="fa-solid fa-clock meta-icon" aria-hidden="true"></i>{" "}
+              {formation.duree}h
+            </span>
+            <span>
+              <i
+                className="fa-solid fa-signal meta-icon"
+                aria-hidden="true"
+              ></i>{" "}
+              {formation.niveauRequis}
+            </span>
+            <span>
+              <i className="fa-solid fa-eye meta-icon" aria-hidden="true"></i>{" "}
+              {formation.vues || 0} vues
+            </span>
+            <span className="formation-price">{formation.prix}€</span>
+          </div>
+          <p className="formation-date">
+            Créé le {new Date(formation.created_at).toLocaleDateString("fr-FR")}
+          </p>
+          <div className="formation-actions">
+            <button
+              className="btn-modify"
+              onClick={() => setFormationToEdit(formation)}
+            >
+              Modifier
+            </button>
+            <button
+              onClick={() => handleDelete(formation.id)}
+              className="btn-delete"
+            >
+              Supprimer
+            </button>
+            <Link to={`/ateliers/${formation.id}`} className="btn-details">
+              Voir détails
+            </Link>
+            <button
+              className="btn-details"
+              onClick={() => setFormationForModules(formation)}
+            >
+              Modules
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  if (loading) {
+    formationsContent = (
+      <div className="no-results">
+        <p>Chargement...</p>
+      </div>
+    );
+  } else if (filteredFormations.length === 0) {
+    formationsContent = (
+      <div className="no-results">
+        <h3>Aucune formation trouvée</h3>
+        <p>
+          Essayez de modifier vos critères ou{" "}
+          <button className="btn-link" onClick={() => setShowCreateModal(true)}>
+            créez une formation
+          </button>
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="dashboard">
       {formationToEdit && (
@@ -455,7 +656,7 @@ function DashboardFormateur() {
       <header className="dashboard-header">
         <div className="container">
           <h1 className="dashboard-title">
-            <i className="fa-solid fa-chalkboard-user" aria-hidden="true"></i>
+            <i className="fa-solid fa-chalkboard-user" aria-hidden="true"></i>{" "}
             Bonjour {user?.prenom} {user?.nom}
           </h1>
           <nav className="dashboard-nav">
@@ -521,8 +722,8 @@ function DashboardFormateur() {
             className="btn-create"
             onClick={() => setShowCreateModal(true)}
           >
-            <i className="fa-solid fa-plus" aria-hidden="true"></i>
-            Nouvelle formation
+            <i className="fa-solid fa-plus" aria-hidden="true"></i> Nouvelle
+            formation
           </button>
         </div>
 
@@ -537,13 +738,7 @@ function DashboardFormateur() {
                   <input
                     type="checkbox"
                     checked={selectedCategories.includes(String(cat.id))}
-                    onChange={() =>
-                      setSelectedCategories((prev) =>
-                        prev.includes(String(cat.id))
-                          ? prev.filter((c) => c !== String(cat.id))
-                          : [...prev, String(cat.id)],
-                      )
-                    }
+                    onChange={() => toggleCategory(String(cat.id))}
                   />
                   <i
                     className={`${getCategoryIconByName(cat.nomCategorie)} meta-icon`}
@@ -561,13 +756,7 @@ function DashboardFormateur() {
                   <input
                     type="checkbox"
                     checked={selectedDurations.includes(String(duree))}
-                    onChange={() =>
-                      setSelectedDurations((prev) =>
-                        prev.includes(String(duree))
-                          ? prev.filter((d) => d !== String(duree))
-                          : [...prev, String(duree)],
-                      )
-                    }
+                    onChange={() => toggleDuration(String(duree))}
                   />
                   {duree} heures
                 </label>
@@ -581,138 +770,24 @@ function DashboardFormateur() {
                   <input
                     type="checkbox"
                     checked={selectedPrices.includes(range.value)}
-                    onChange={() =>
-                      setSelectedPrices((prev) =>
-                        prev.includes(range.value)
-                          ? prev.filter((p) => p !== range.value)
-                          : [...prev, range.value],
-                      )
-                    }
+                    onChange={() => togglePrice(range.value)}
                   />
                   {range.label}
                 </label>
               ))}
             </div>
 
-            <button
-              onClick={() => {
-                setSearch("");
-                setSelectedCategories([]);
-                setSelectedDurations([]);
-                setSelectedPrices([]);
-              }}
-              className="btn-reset"
-            >
+            <button onClick={resetFilters} className="btn-reset">
               Réinitialiser
             </button>
           </aside>
 
           <main className="formations-list">
             <div className="results-header">
-              <p>
-                {filteredFormations.length} formation
-                {filteredFormations.length > 1 ? "s" : ""} trouvée
-                {filteredFormations.length > 1 ? "s" : ""}
-              </p>
+              <p>{foundFormationsLabel}</p>
             </div>
 
-            {loading ? (
-              <div className="no-results">
-                <p>Chargement...</p>
-              </div>
-            ) : filteredFormations.length === 0 ? (
-              <div className="no-results">
-                <h3>Aucune formation trouvée</h3>
-                <p>
-                  Essayez de modifier vos critères ou{" "}
-                  <button
-                    className="btn-link"
-                    onClick={() => setShowCreateModal(true)}
-                  >
-                    créez une formation
-                  </button>
-                </p>
-              </div>
-            ) : (
-              <div className="formations-grid">
-                {filteredFormations.map((formation) => (
-                  <div key={formation.id} className="formation-card">
-                    <div className="formation-header">
-                      <span className={`badge badge-${formation.statut}`}>
-                        {formation.statut === "publié" ? "Publié" : "Brouillon"}
-                      </span>
-                      <span className="formation-category">
-                        <i
-                          className={`${getCategoryIconByName(formation.categorie?.nomCategorie)} meta-icon`}
-                          aria-hidden="true"
-                        ></i>
-                        {formation.categorie?.nomCategorie || "Non classe"}
-                      </span>
-                    </div>
-                    <h3>{formation.titre}</h3>
-                    <p className="formation-description">
-                      {formation.description}
-                    </p>
-                    <div className="formation-meta">
-                      <span>
-                        <i
-                          className="fa-solid fa-clock meta-icon"
-                          aria-hidden="true"
-                        ></i>
-                        {formation.duree}h
-                      </span>
-                      <span>
-                        <i
-                          className="fa-solid fa-signal meta-icon"
-                          aria-hidden="true"
-                        ></i>
-                        {formation.niveauRequis}
-                      </span>
-                      <span>
-                        <i
-                          className="fa-solid fa-eye meta-icon"
-                          aria-hidden="true"
-                        ></i>
-                        {formation.vues || 0} vues
-                      </span>
-                      <span className="formation-price">{formation.prix}€</span>
-                    </div>
-                    <p className="formation-date">
-                      Créé le{" "}
-                      {new Date(formation.created_at).toLocaleDateString(
-                        "fr-FR",
-                      )}
-                    </p>
-                    <div className="formation-actions">
-                      <button
-                        className="btn-modify"
-                        onClick={() => setFormationToEdit(formation)}
-                      >
-                        Modifier
-                      </button>
-                      <button
-                        onClick={() => handleDelete(formation.id)}
-                        className="btn-delete"
-                      >
-                        Supprimer
-                      </button>
-                      <Link
-                        to={`/ateliers/${formation.id}`}
-                        className="btn-details"
-                      >
-                        Voir détails
-                      </Link>
-                      <button
-                        className="btn-details"
-                        onClick={() => setFormationForModules(formation)}
-                      >
-                        Modules
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            {formationsContent}
           </main>
         </div>
       </div>

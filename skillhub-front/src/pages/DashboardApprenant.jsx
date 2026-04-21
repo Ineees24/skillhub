@@ -90,6 +90,96 @@ const priceRanges = [
 
 const durationOptions = [2, 3, 4, 6, 8];
 
+function mapAteliersToDashboard(rows) {
+  return rows.map((formation, index) => {
+    const termine = index % 3 === 0;
+    const progression = termine ? 100 : 20 + ((index * 13) % 70);
+
+    return {
+      id: formation.id,
+      titre: formation.titre,
+      description: formation.description || "",
+      categorie: formation.categorie || "developpement",
+      duree: Number(formation.duree || 0),
+      prix: Number(formation.prix || 0),
+      statut: termine ? "termine" : "en-cours",
+      dateInscription: new Date().toISOString().slice(0, 10),
+      progression,
+    };
+  });
+}
+
+function matchesPriceRange(prix, range) {
+  if (range === "0-50") return prix >= 0 && prix <= 50;
+  if (range === "50-100") return prix > 50 && prix <= 100;
+  if (range === "100-150") return prix > 100 && prix <= 150;
+  if (range === "150+") return prix > 150;
+
+  return false;
+}
+
+function matchesSelectedPriceRanges(prix, selectedPrices) {
+  return selectedPrices.some((range) => matchesPriceRange(prix, range));
+}
+
+function matchesSearch(formation, search) {
+  if (!search) return true;
+
+  const normalizedSearch = search.toLowerCase();
+  return (
+    formation.titre.toLowerCase().includes(normalizedSearch) ||
+    formation.description.toLowerCase().includes(normalizedSearch)
+  );
+}
+
+function matchesFilters(formation, filters) {
+  const {
+    search,
+    selectedCategories,
+    selectedDurations,
+    selectedPrices,
+    selectedStatuts,
+  } = filters;
+
+  if (!matchesSearch(formation, search)) {
+    return false;
+  }
+
+  if (
+    selectedCategories.length > 0 &&
+    !selectedCategories.includes(formation.categorie)
+  ) {
+    return false;
+  }
+
+  if (
+    selectedDurations.length > 0 &&
+    !selectedDurations.includes(formation.duree.toString())
+  ) {
+    return false;
+  }
+
+  if (
+    selectedPrices.length > 0 &&
+    !matchesSelectedPriceRanges(formation.prix, selectedPrices)
+  ) {
+    return false;
+  }
+
+  if (
+    selectedStatuts.length > 0 &&
+    !selectedStatuts.includes(formation.statut)
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+function removeFormationById(formationsList, id) {
+  return formationsList.filter((formation) => formation.id !== id);
+}
+
 function DashboardApprenant() {
   const navigate = useNavigate();
   const [formations, setFormations] = useState(fallbackApprenantFormations);
@@ -103,25 +193,6 @@ function DashboardApprenant() {
 
   useEffect(() => {
     let alive = true;
-    setLoading(true);
-    setApiError("");
-
-    const mapAteliersToDashboard = (rows) =>
-      rows.map((f, index) => {
-        const termine = index % 3 === 0;
-        const progression = termine ? 100 : 20 + ((index * 13) % 70);
-        return {
-          id: f.id,
-          titre: f.titre,
-          description: f.description || "",
-          categorie: f.categorie || "developpement",
-          duree: Number(f.duree || 0),
-          prix: Number(f.prix || 0),
-          statut: termine ? "termine" : "en-cours",
-          dateInscription: new Date().toISOString().slice(0, 10),
-          progression,
-        };
-      });
 
     fetchMesInscriptions()
       .then((data) => {
@@ -163,52 +234,15 @@ function DashboardApprenant() {
   }, []);
 
   const filteredFormations = useMemo(() => {
-    return formations.filter((formation) => {
-      if (
-        search &&
-        !formation.titre.toLowerCase().includes(search.toLowerCase()) &&
-        !formation.description.toLowerCase().includes(search.toLowerCase())
-      ) {
-        return false;
-      }
-
-      if (
-        selectedCategories.length > 0 &&
-        !selectedCategories.includes(formation.categorie)
-      ) {
-        return false;
-      }
-
-      if (
-        selectedDurations.length > 0 &&
-        !selectedDurations.includes(formation.duree.toString())
-      ) {
-        return false;
-      }
-
-      if (selectedPrices.length > 0) {
-        const priceMatch = selectedPrices.some((range) => {
-          if (range === "0-50")
-            return formation.prix >= 0 && formation.prix <= 50;
-          if (range === "50-100")
-            return formation.prix > 50 && formation.prix <= 100;
-          if (range === "100-150")
-            return formation.prix > 100 && formation.prix <= 150;
-          if (range === "150+") return formation.prix > 150;
-          return false;
-        });
-        if (!priceMatch) return false;
-      }
-
-      if (
-        selectedStatuts.length > 0 &&
-        !selectedStatuts.includes(formation.statut)
-      ) {
-        return false;
-      }
-
-      return true;
-    });
+    return formations.filter((formation) =>
+      matchesFilters(formation, {
+        search,
+        selectedCategories,
+        selectedDurations,
+        selectedPrices,
+        selectedStatuts,
+      }),
+    );
   }, [
     formations,
     search,
@@ -228,17 +262,13 @@ function DashboardApprenant() {
 
   const handleDurationChange = (duree) => {
     setSelectedDurations((prev) =>
-      prev.includes(duree)
-        ? prev.filter((d) => d !== duree)
-        : [...prev, duree],
+      prev.includes(duree) ? prev.filter((d) => d !== duree) : [...prev, duree],
     );
   };
 
   const handlePriceChange = (price) => {
     setSelectedPrices((prev) =>
-      prev.includes(price)
-        ? prev.filter((p) => p !== price)
-        : [...prev, price],
+      prev.includes(price) ? prev.filter((p) => p !== price) : [...prev, price],
     );
   };
 
@@ -267,9 +297,10 @@ function DashboardApprenant() {
       "Voulez-vous vraiment ne plus suivre cette formation ?",
     );
     if (!ok) return;
+
     desinscrireAtelier(id)
       .then(() => {
-        setFormations((prev) => prev.filter((f) => f.id !== id));
+        setFormations(removeFormationById(formations, id));
       })
       .catch((err) => {
         const msg =
@@ -293,8 +324,8 @@ function DashboardApprenant() {
       <header className="dashboard-header">
         <div className="container">
           <h1 className="dashboard-title">
-            <i className="fa-solid fa-user-graduate" aria-hidden="true"></i>
-            {" "}Tableau de bord Apprenant
+            <i className="fa-solid fa-user-graduate" aria-hidden="true"></i>{" "}
+            Tableau de bord Apprenant
           </h1>
           <nav className="dashboard-nav">
             <Link to="/apprenant" className="active">
@@ -307,7 +338,10 @@ function DashboardApprenant() {
       <div className="container dashboard-content">
         <div className="dashboard-stats">
           <div className="stat-card">
-            <i className="fa-solid fa-book-open stat-icon" aria-hidden="true"></i>
+            <i
+              className="fa-solid fa-book-open stat-icon"
+              aria-hidden="true"
+            ></i>
             <h3>{stats.total}</h3>
             <p>Formations totales</p>
           </div>
@@ -317,13 +351,19 @@ function DashboardApprenant() {
             <p>En cours</p>
           </div>
           <div className="stat-card">
-            <i className="fa-solid fa-circle-check stat-icon" aria-hidden="true"></i>
+            <i
+              className="fa-solid fa-circle-check stat-icon"
+              aria-hidden="true"
+            ></i>
             <h3>{stats.termine}</h3>
             <p>Terminées</p>
           </div>
           <div className="stat-card">
-            <i className="fa-solid fa-chart-line stat-icon" aria-hidden="true"></i>
-            <h3>{stats.progressionMoyenne}{" "}%</h3>
+            <i
+              className="fa-solid fa-chart-line stat-icon"
+              aria-hidden="true"
+            ></i>
+            <h3>{stats.progressionMoyenne} %</h3>
             <p>Progression moyenne</p>
           </div>
         </div>
@@ -385,7 +425,7 @@ function DashboardApprenant() {
                     checked={selectedDurations.includes(duree.toString())}
                     onChange={() => handleDurationChange(duree.toString())}
                   />{" "}
-                  {duree}{" "}heures
+                  {duree} heures
                 </label>
               ))}
             </div>
@@ -412,9 +452,9 @@ function DashboardApprenant() {
           <main className="formations-list">
             <div className="results-header">
               <p>
-                {filteredFormations.length}{" "}
-                formation{filteredFormations.length > 1 ? "s" : ""}{" "}
-                trouvée{filteredFormations.length > 1 ? "s" : ""}
+                {filteredFormations.length} formation
+                {filteredFormations.length > 1 ? "s" : ""} trouvée
+                {filteredFormations.length > 1 ? "s" : ""}
               </p>
               {loading && <p>Chargement des formations...</p>}
               {!loading && apiError && (
@@ -441,8 +481,8 @@ function DashboardApprenant() {
                         <i
                           className={`${getCategoryVisualByKey(formation.categorie).icon} meta-icon`}
                           aria-hidden="true"
-                        ></i>
-                        {" "}{categories[formation.categorie]}
+                        ></i>{" "}
+                        {categories[formation.categorie]}
                       </span>
                     </div>
 
@@ -456,8 +496,8 @@ function DashboardApprenant() {
                         <i
                           className="fa-solid fa-clock meta-icon"
                           aria-hidden="true"
-                        ></i>
-                        {" "}{formation.duree}h
+                        ></i>{" "}
+                        {formation.duree}h
                       </span>
                       <span className="formation-price">{formation.prix}€</span>
                     </div>
@@ -476,7 +516,9 @@ function DashboardApprenant() {
 
                     <p className="formation-date">
                       Inscrit le{" "}
-                      {new Date(formation.dateInscription).toLocaleDateString("fr-FR")}
+                      {new Date(formation.dateInscription).toLocaleDateString(
+                        "fr-FR",
+                      )}
                     </p>
 
                     <div className="formation-actions">
