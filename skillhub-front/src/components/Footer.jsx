@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
-import './Footer.css'
+import { Link } from "react-router-dom";
+import "./Footer.css";
 
 function Footer() {
   return (
@@ -28,13 +28,13 @@ function Footer() {
             <h3>Légal</h3>
             <ul>
               <li>
-                <a href="#">Mentions légales</a>
+                <Link to="/mentions-legales">Mentions légales</Link>
               </li>
               <li>
-                <a href="#">RGPD</a>
+                <Link to="/rgpd">RGPD</Link>
               </li>
               <li>
-                <a href="#">Cookies</a>
+                <Link to="/cookies">Cookies</Link>
               </li>
             </ul>
           </div>
@@ -42,23 +42,38 @@ function Footer() {
             <h3>Réseaux</h3>
             <ul>
               <li>
-                <a href="#">LinkedIn</a>
+                <a
+                  href="https://www.linkedin.com"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  LinkedIn
+                </a>
               </li>
               <li>
-                <a href="#">Twitter</a>
+                <a href="https://x.com" target="_blank" rel="noreferrer">
+                  Twitter
+                </a>
               </li>
               <li>
-                <a href="#">Instagram</a>
+                <a
+                  href="https://www.instagram.com"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Instagram
+                </a>
               </li>
             </ul>
           </div>
         </div>
         <p className="footer-bottom">
-          &copy; <span id="year">{new Date().getFullYear()}</span> SkillHub. Tous droits réservés.
+          &copy; <span id="year">{new Date().getFullYear()}</span> SkillHub.
+          Tous droits réservés.
         </p>
       </div>
     </footer>
-  )
+  );
 }
 
-export default Footer
+export default Footer;
