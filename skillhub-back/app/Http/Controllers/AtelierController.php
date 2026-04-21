@@ -168,81 +168,71 @@ class AtelierController extends Controller
             return response()->json(['message' => 'Seuls les apprenants peuvent s inscrire.'], 403);
         }
 
-        $formation = Formation::find($id);
-        if (! $formation) {
-            return response()->json(['message' => 'Formation introuvable'], 404);
+        $inscriptionContext = $this->resolveInscriptionContext($id);
+        if ($inscriptionContext['status'] !== null) {
+            return response()->json(['message' => $inscriptionContext['message']], $inscriptionContext['status']);
         }
 
-        if (! Schema::hasTable('inscription')) {
-            return response()->json(['message' => 'Table inscription indisponible'], 500);
-        }
+        /** @var Formation $formation */
+        $formation = $inscriptionContext['formation'];
 
         $already = DB::table('inscription')
             ->where('idUtilisateur', $user->id)
             ->where('idFormation', $formation->id)
             ->exists();
 
-        if ($already) {
-            return response()->json(['message' => 'Vous etes deja inscrit a cette formation.']);
+        $status = 200;
+        $message = 'Vous etes deja inscrit a cette formation.';
+
+        if (! $already) {
+            DB::table('inscription')->insert($this->buildInscriptionPayload((int) $user->id, (int) $formation->id));
+
+            // MongoDB — historisation
+            $this->activityLog->logEvent('course_enrollment', [
+                'user_id' => $user->id,
+                'course_id' => $formation->id,
+            ]);
+
+            $status = 201;
+            $message = 'Inscription effectuee avec succes.';
         }
 
-        $payload = [
-            'idUtilisateur' => $user->id,
-            'idFormation' => $formation->id,
-        ];
-
-        if (Schema::hasColumn('inscription', 'dateInscription')) {
-            $payload['dateInscription'] = now()->toDateString();
-        }
-        if (Schema::hasColumn('inscription', 'statut')) {
-            $payload['statut'] = 'en-cours';
-        }
-        if (Schema::hasColumn('inscription', 'created_at')) {
-            $payload['created_at'] = now();
-        }
-        if (Schema::hasColumn('inscription', 'updated_at')) {
-            $payload['updated_at'] = now();
-        }
-
-        DB::table('inscription')->insert($payload);
-
-        // MongoDB — historisation 
-        $this->activityLog->logEvent('course_enrollment', [
-            'user_id' => $user->id,
-            'course_id' => $formation->id,
-        ]);
-
-        return response()->json(['message' => 'Inscription effectuee avec succes.'], 201);
+        return response()->json(['message' => $message], $status);
     }
 
 
     public function desinscrire(int $id)
     {
         $user = auth('api')->user();
+        $status = 200;
+        $message = '';
 
         if (! $user || strtoupper((string) $user->role) !== 'APPRENANT') {
-            return response()->json(['message' => 'Seuls les apprenants peuvent se desinscrire.'], 403);
+            $status = 403;
+            $message = 'Seuls les apprenants peuvent se desinscrire.';
+        } elseif (! Schema::hasTable('inscription')) {
+            $status = 500;
+            $message = 'Table inscription indisponible';
+        } else {
+            $deleted = DB::table('inscription')
+                ->where('idUtilisateur', $user->id)
+                ->where('idFormation', $id)
+                ->delete();
+
+            if ($deleted === 0) {
+                $status = 404;
+                $message = 'Aucune inscription trouvee pour cette formation.';
+            } else {
+                $this->activityLog->logEvent('course_unenrollment', [
+                    'user_id' => $user->id,
+                    'course_id' => $id,
+                ]);
+
+                $message = 'Desinscription effectuee avec succes.';
+            }
         }
 
-        if (! Schema::hasTable('inscription')) {
-            return response()->json(['message' => 'Table inscription indisponible'], 500);
-        }
-
-        $deleted = DB::table('inscription')
-            ->where('idUtilisateur', $user->id)
-            ->where('idFormation', $id)
-            ->delete();
-
-        if ($deleted === 0) {
-            return response()->json(['message' => 'Aucune inscription trouvee pour cette formation.'], 404);
-        }
-
-        $this->activityLog->logEvent('course_unenrollment', [
-            'user_id' => $user->id,
-            'course_id' => $id,
-        ]);
-
-        return response()->json(['message' => 'Desinscription effectuee avec succes.']);
+        return response()->json(['message' => $message], $status);
     }
 
 
@@ -327,6 +317,55 @@ class AtelierController extends Controller
             'apprenants' => $inscrits,
             'vues' => $vues,
         ];
+    }
+
+    private function resolveInscriptionContext(int $id): array
+    {
+        $formation = Formation::find($id);
+        if (! $formation) {
+            return [
+                'formation' => null,
+                'status' => 404,
+                'message' => 'Formation introuvable',
+            ];
+        }
+
+        if (! Schema::hasTable('inscription')) {
+            return [
+                'formation' => null,
+                'status' => 500,
+                'message' => 'Table inscription indisponible',
+            ];
+        }
+
+        return [
+            'formation' => $formation,
+            'status' => null,
+            'message' => null,
+        ];
+    }
+
+    private function buildInscriptionPayload(int $userId, int $formationId): array
+    {
+        $payload = [
+            'idUtilisateur' => $userId,
+            'idFormation' => $formationId,
+        ];
+
+        if (Schema::hasColumn('inscription', 'dateInscription')) {
+            $payload['dateInscription'] = now()->toDateString();
+        }
+        if (Schema::hasColumn('inscription', 'statut')) {
+            $payload['statut'] = 'en-cours';
+        }
+        if (Schema::hasColumn('inscription', 'created_at')) {
+            $payload['created_at'] = now();
+        }
+        if (Schema::hasColumn('inscription', 'updated_at')) {
+            $payload['updated_at'] = now();
+        }
+
+        return $payload;
     }
 
     private function optionalJwtUser(Request $request): ?\App\Models\User
