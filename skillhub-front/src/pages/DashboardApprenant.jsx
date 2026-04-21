@@ -211,6 +211,7 @@ function DashboardApprenant() {
             Bonjour {user?.prenom} {user?.nom}
           </h1>
           <nav className="dashboard-nav">
+            <Link to="/">Accueil</Link>
             <Link to="/apprenant" className="active">
               Mes formations
             </Link>

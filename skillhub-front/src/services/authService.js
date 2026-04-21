@@ -16,14 +16,18 @@ function extractBearerToken(authHeader) {
   return pickString(match?.[1] ?? header);
 }
 
-function extractToken(data) {
-  if (!data || typeof data !== "object") return null;
+function extractTokenFromNode(node, keys) {
+  if (!node || typeof node !== "object") return null;
 
-  for (const key of TOKEN_KEYS) {
-    const direct = pickString(data[key]);
-    if (direct) return direct;
+  for (const key of keys) {
+    const value = pickString(node[key]);
+    if (value) return value;
   }
 
+  return null;
+}
+
+function extractTokenFromNestedCandidates(data) {
   const nestedCandidates = [
     data?.data,
     data?.result,
@@ -33,22 +37,35 @@ function extractToken(data) {
   ];
 
   for (const node of nestedCandidates) {
-    if (!node || typeof node !== "object") continue;
-    for (const key of TOKEN_KEYS) {
-      const nested = pickString(node[key]);
-      if (nested) return nested;
-    }
-  }
-
-  const altKeys = ["accessToken", "jwt", "plainTextToken"];
-  for (const key of altKeys) {
-    const alt = pickString(data[key]);
-    if (alt) return alt;
-    const nestedAlt = pickString(data?.data?.[key]);
-    if (nestedAlt) return nestedAlt;
+    const token = extractTokenFromNode(node, TOKEN_KEYS);
+    if (token) return token;
   }
 
   return null;
+}
+
+function extractTokenFromAlternativeKeys(data) {
+  const altKeys = ["accessToken", "jwt", "plainTextToken"];
+
+  for (const key of altKeys) {
+    const direct = pickString(data[key]);
+    if (direct) return direct;
+
+    const nested = pickString(data?.data?.[key]);
+    if (nested) return nested;
+  }
+
+  return null;
+}
+
+function extractToken(data) {
+  if (!data || typeof data !== "object") return null;
+
+  return (
+    extractTokenFromNode(data, TOKEN_KEYS) ??
+    extractTokenFromNestedCandidates(data) ??
+    extractTokenFromAlternativeKeys(data)
+  );
 }
 
 function extractUser(data, fallbackUser) {
