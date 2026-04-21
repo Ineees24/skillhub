@@ -3,74 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import {
   desinscrireAtelier,
-  fetchAteliers,
   fetchMesInscriptions,
 } from "../services/atelierService";
+import { getUser, logout } from "../services/authService";
 import { getCategoryVisualByKey } from "../utils/categoryVisuals";
 import "./Dashboard.css";
-
-const fallbackApprenantFormations = [
-  {
-    id: 1,
-    titre: "Introduction à React",
-    description:
-      "Découvrez les bases de React et créez votre première application interactive.",
-    categorie: "developpement",
-    duree: 4,
-    prix: 89,
-    statut: "en-cours",
-    dateInscription: "2024-02-20",
-    progression: 60,
-  },
-  {
-    id: 2,
-    titre: "UI Design avec Figma",
-    description:
-      "Maîtrisez Figma pour créer des interfaces modernes et professionnelles.",
-    categorie: "design",
-    duree: 3,
-    prix: 75,
-    statut: "termine",
-    dateInscription: "2024-01-15",
-    progression: 100,
-  },
-  {
-    id: 3,
-    titre: "SEO pour débutants",
-    description:
-      "Apprenez les techniques de référencement naturel pour améliorer votre visibilité.",
-    categorie: "marketing",
-    duree: 2,
-    prix: 49,
-    statut: "termine",
-    dateInscription: "2024-01-10",
-    progression: 100,
-  },
-  {
-    id: 4,
-    titre: "Communication assertive",
-    description:
-      "Développez votre capacité à communiquer avec confiance et clarté.",
-    categorie: "soft-skills",
-    duree: 3,
-    prix: 65,
-    statut: "en-cours",
-    dateInscription: "2024-02-25",
-    progression: 30,
-  },
-  {
-    id: 5,
-    titre: "Montage vidéo avec Premiere Pro",
-    description:
-      "Maîtrisez Premiere Pro pour créer des vidéos professionnelles.",
-    categorie: "creation-contenu",
-    duree: 6,
-    prix: 95,
-    statut: "termine",
-    dateInscription: "2024-01-05",
-    progression: 100,
-  },
-];
 
 const categories = {
   developpement: "Developpement",
@@ -90,6 +27,8 @@ const priceRanges = [
 
 const durationOptions = [2, 3, 4, 6, 8];
 
+<<<<<<< dev
+=======
 function mapAteliersToDashboard(rows) {
   return rows.map((formation, index) => {
     const termine = index % 3 === 0;
@@ -176,13 +115,15 @@ function matchesFilters(formation, filters) {
   return true;
 }
 
+>>>>>>> main
 function removeFormationById(formationsList, id) {
   return formationsList.filter((formation) => formation.id !== id);
 }
 
 function DashboardApprenant() {
   const navigate = useNavigate();
-  const [formations, setFormations] = useState(fallbackApprenantFormations);
+  const user = getUser();
+  const [formations, setFormations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState("");
   const [search, setSearch] = useState("");
@@ -200,29 +141,15 @@ function DashboardApprenant() {
         const inscriptions = Array.isArray(data?.inscriptions)
           ? data.inscriptions
           : [];
-        if (inscriptions.length > 0) {
-          setFormations(inscriptions);
-          return;
+        setFormations(inscriptions);
+        if (inscriptions.length === 0) {
+          setApiError("Vous n'etes inscrit a aucune formation pour le moment.");
         }
-
-        return fetchAteliers().then((allData) => {
-          if (!alive) return;
-          const rows = Array.isArray(allData?.liste_atelier)
-            ? allData.liste_atelier
-            : [];
-          if (rows.length > 0) {
-            setFormations(mapAteliersToDashboard(rows));
-            setApiError(
-              "Aucune inscription trouvée, affichage de la liste générale.",
-            );
-          } else {
-            setApiError("Aucune formation récupérée depuis le backend.");
-          }
-        });
       })
       .catch(() => {
         if (!alive) return;
-        setApiError("Backend indisponible, affichage des données locales.");
+        setApiError("Impossible de charger vos inscriptions pour le moment.");
+        setFormations([]);
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -292,6 +219,15 @@ function DashboardApprenant() {
     navigate(`/apprenant/suivi/${id}`);
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Erreur lors de la deconnexion", error);
+    }
+  };
+
   const handleNePlusSuivre = (id) => {
     const ok = globalThis.confirm(
       "Voulez-vous vraiment ne plus suivre cette formation ?",
@@ -325,12 +261,24 @@ function DashboardApprenant() {
         <div className="container">
           <h1 className="dashboard-title">
             <i className="fa-solid fa-user-graduate" aria-hidden="true"></i>{" "}
+<<<<<<< dev
+            Bonjour {user?.prenom} {user?.nom}
+=======
             Tableau de bord Apprenant
+>>>>>>> main
           </h1>
           <nav className="dashboard-nav">
             <Link to="/apprenant" className="active">
               Mes formations
             </Link>
+            <Link to="/ateliers">Catalogue</Link>
+            <button
+              onClick={handleLogout}
+              className="btn-reset"
+              style={{ width: "auto", padding: "8px 16px", marginTop: 0 }}
+            >
+              Deconnexion
+            </button>
           </nav>
         </div>
       </header>
