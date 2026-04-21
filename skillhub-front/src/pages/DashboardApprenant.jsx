@@ -27,6 +27,95 @@ const priceRanges = [
 
 const durationOptions = [2, 3, 4, 6, 8];
 
+<<<<<<< dev
+=======
+function mapAteliersToDashboard(rows) {
+  return rows.map((formation, index) => {
+    const termine = index % 3 === 0;
+    const progression = termine ? 100 : 20 + ((index * 13) % 70);
+
+    return {
+      id: formation.id,
+      titre: formation.titre,
+      description: formation.description || "",
+      categorie: formation.categorie || "developpement",
+      duree: Number(formation.duree || 0),
+      prix: Number(formation.prix || 0),
+      statut: termine ? "termine" : "en-cours",
+      dateInscription: new Date().toISOString().slice(0, 10),
+      progression,
+    };
+  });
+}
+
+function matchesPriceRange(prix, range) {
+  if (range === "0-50") return prix >= 0 && prix <= 50;
+  if (range === "50-100") return prix > 50 && prix <= 100;
+  if (range === "100-150") return prix > 100 && prix <= 150;
+  if (range === "150+") return prix > 150;
+
+  return false;
+}
+
+function matchesSelectedPriceRanges(prix, selectedPrices) {
+  return selectedPrices.some((range) => matchesPriceRange(prix, range));
+}
+
+function matchesSearch(formation, search) {
+  if (!search) return true;
+
+  const normalizedSearch = search.toLowerCase();
+  return (
+    formation.titre.toLowerCase().includes(normalizedSearch) ||
+    formation.description.toLowerCase().includes(normalizedSearch)
+  );
+}
+
+function matchesFilters(formation, filters) {
+  const {
+    search,
+    selectedCategories,
+    selectedDurations,
+    selectedPrices,
+    selectedStatuts,
+  } = filters;
+
+  if (!matchesSearch(formation, search)) {
+    return false;
+  }
+
+  if (
+    selectedCategories.length > 0 &&
+    !selectedCategories.includes(formation.categorie)
+  ) {
+    return false;
+  }
+
+  if (
+    selectedDurations.length > 0 &&
+    !selectedDurations.includes(formation.duree.toString())
+  ) {
+    return false;
+  }
+
+  if (
+    selectedPrices.length > 0 &&
+    !matchesSelectedPriceRanges(formation.prix, selectedPrices)
+  ) {
+    return false;
+  }
+
+  if (
+    selectedStatuts.length > 0 &&
+    !selectedStatuts.includes(formation.statut)
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+>>>>>>> main
 function removeFormationById(formationsList, id) {
   return formationsList.filter((formation) => formation.id !== id);
 }
@@ -72,52 +161,15 @@ function DashboardApprenant() {
   }, []);
 
   const filteredFormations = useMemo(() => {
-    return formations.filter((formation) => {
-      if (
-        search &&
-        !formation.titre.toLowerCase().includes(search.toLowerCase()) &&
-        !formation.description.toLowerCase().includes(search.toLowerCase())
-      ) {
-        return false;
-      }
-
-      if (
-        selectedCategories.length > 0 &&
-        !selectedCategories.includes(formation.categorie)
-      ) {
-        return false;
-      }
-
-      if (
-        selectedDurations.length > 0 &&
-        !selectedDurations.includes(formation.duree.toString())
-      ) {
-        return false;
-      }
-
-      if (selectedPrices.length > 0) {
-        const priceMatch = selectedPrices.some((range) => {
-          if (range === "0-50")
-            return formation.prix >= 0 && formation.prix <= 50;
-          if (range === "50-100")
-            return formation.prix > 50 && formation.prix <= 100;
-          if (range === "100-150")
-            return formation.prix > 100 && formation.prix <= 150;
-          if (range === "150+") return formation.prix > 150;
-          return false;
-        });
-        if (!priceMatch) return false;
-      }
-
-      if (
-        selectedStatuts.length > 0 &&
-        !selectedStatuts.includes(formation.statut)
-      ) {
-        return false;
-      }
-
-      return true;
-    });
+    return formations.filter((formation) =>
+      matchesFilters(formation, {
+        search,
+        selectedCategories,
+        selectedDurations,
+        selectedPrices,
+        selectedStatuts,
+      }),
+    );
   }, [
     formations,
     search,
@@ -181,6 +233,7 @@ function DashboardApprenant() {
       "Voulez-vous vraiment ne plus suivre cette formation ?",
     );
     if (!ok) return;
+
     desinscrireAtelier(id)
       .then(() => {
         setFormations(removeFormationById(formations, id));
@@ -208,7 +261,11 @@ function DashboardApprenant() {
         <div className="container">
           <h1 className="dashboard-title">
             <i className="fa-solid fa-user-graduate" aria-hidden="true"></i>{" "}
+<<<<<<< dev
             Bonjour {user?.prenom} {user?.nom}
+=======
+            Tableau de bord Apprenant
+>>>>>>> main
           </h1>
           <nav className="dashboard-nav">
             <Link to="/apprenant" className="active">

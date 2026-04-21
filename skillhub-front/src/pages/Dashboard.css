@@ -39,7 +39,7 @@
 }
 
 .dashboard-nav a {
-  color: #cbd5e1;
+  color: #9ca3af;
   text-decoration: none;
   padding: 8px 16px;
   border-radius: 8px;
@@ -47,6 +47,7 @@
 }
 
 .dashboard-nav a:hover {
+<<<<<<< dev
   color: #f8fafc;
   background: rgba(109, 40, 217, 0.32);
 }
@@ -54,6 +55,15 @@
 .dashboard-nav a.active {
   color: #ffffff;
   background: rgba(91, 33, 182, 0.56);
+=======
+  color: #e5e7eb;
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.dashboard-nav a.active {
+  color: #6366f1;
+  background: rgba(99, 102, 241, 0.2);
+>>>>>>> main
 }
 
 /* Content */
@@ -97,7 +107,7 @@
 }
 
 .stat-card p {
-  color: #cbd5e1;
+  color: #9ca3af;
   font-size: 0.9rem;
 }
 
@@ -136,7 +146,7 @@
 }
 
 .search-input::placeholder {
-  color: #9ca3af;
+  color: #6b7280;
 }
 
 /* Layout */
@@ -180,7 +190,7 @@
   gap: 10px;
   padding: 8px 0;
   cursor: pointer;
-  color: #e5e7eb;
+  color: #d1d5db;
   font-size: 0.95rem;
 }
 
@@ -222,7 +232,7 @@
 }
 
 .results-header p {
-  color: #cbd5e1;
+  color: #9ca3af;
 }
 
 .formations-grid {
@@ -260,32 +270,38 @@
 }
 
 .badge-publié {
-  background: #14532d;
-  color: #f0fdf4;
-  border: 1px solid #166534;
+  background: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
 .badge-brouillon {
-  background: #78350f;
-  color: #fffbeb;
-  border: 1px solid #92400e;
+  background: rgba(251, 191, 36, 0.2);
+  color: #fde047;
+  border: 1px solid rgba(251, 191, 36, 0.3);
 }
 
 .badge-en-cours {
+<<<<<<< dev
   background: #581c87;
   color: #faf5ff;
   border: 1px solid #6b21a8;
+=======
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+>>>>>>> main
 }
 
 .badge-termine {
-  background: #14532d;
-  color: #f0fdf4;
-  border: 1px solid #166534;
+  background: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
 .formation-category {
   font-size: 0.85rem;
-  color: #e2e8f0;
+  color: #cbd5e1;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -298,7 +314,7 @@
 }
 
 .formation-description {
-  color: #cbd5e1;
+  color: #9ca3af;
   margin-bottom: 15px;
   font-size: 0.95rem;
   line-height: 1.5;
@@ -311,7 +327,7 @@
   row-gap: 10px;
   margin-bottom: 15px;
   font-size: 0.9rem;
-  color: #e5e7eb;
+  color: #d1d5db;
 }
 
 .formation-meta span {
@@ -338,7 +354,7 @@
 }
 
 .formation-date {
-  color: #cbd5e1;
+  color: #6b7280;
   font-size: 0.85rem;
   margin-bottom: 15px;
 }
@@ -400,6 +416,7 @@
 }
 
 .btn-modify {
+<<<<<<< dev
   background: #581c87;
   color: #ffffff;
   border: 1px solid #6b21a8;
@@ -407,30 +424,43 @@
 
 .btn-modify:hover {
   background: #6b21a8;
+=======
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.btn-modify:hover {
+  background: rgba(99, 102, 241, 0.3);
+>>>>>>> main
 }
 
 .btn-delete {
-  background: #7f1d1d;
-  color: #ffffff;
-  border: 1px solid #991b1b;
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .btn-delete:hover {
-  background: #991b1b;
+  background: rgba(239, 68, 68, 0.3);
 }
 
 .btn-details {
-  background: #1f2937;
-  color: #f8fafc;
-  border: 1px solid #334155;
+  background: #374151;
+  color: #e5e7eb;
+  border: 1px solid #4b5563;
 }
 
 .btn-details:hover {
-  background: #334155;
+  background: #4b5563;
 }
 
 .btn-continue {
+<<<<<<< dev
   background: linear-gradient(135deg, #581c87, #7e22ce);
+=======
+  background: linear-gradient(135deg, #6366f1, #22c55e);
+>>>>>>> main
   color: #fff;
   border: none;
 }
@@ -441,6 +471,7 @@
 }
 
 .btn-review {
+<<<<<<< dev
   background: #581c87;
   color: #ffffff;
   border: 1px solid #6b21a8;
@@ -452,6 +483,19 @@
 
 .btn-follow {
   background: linear-gradient(135deg, #581c87, #7e22ce);
+=======
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.btn-review:hover {
+  background: rgba(99, 102, 241, 0.3);
+}
+
+.btn-follow {
+  background: linear-gradient(135deg, #6366f1, #22c55e);
+>>>>>>> main
   color: #fff;
   border: none;
 }
@@ -462,13 +506,13 @@
 }
 
 .btn-unfollow {
-  background: #7f1d1d;
-  color: #ffffff;
-  border: 1px solid #991b1b;
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .btn-unfollow:hover {
-  background: #991b1b;
+  background: rgba(239, 68, 68, 0.3);
 }
 
 /* No results */
@@ -476,7 +520,7 @@
   grid-column: 1 / -1;
   text-align: center;
   padding: 60px 20px;
-  color: #cbd5e1;
+  color: #9ca3af;
 }
 
 .no-results h3 {
@@ -493,7 +537,7 @@
 }
 
 .dashboard-title i {
-  color: #ffffff;
+  color: #a5b4fc;
 }
 
 /* Modal */
@@ -538,7 +582,7 @@
 .modal-close {
   background: none;
   border: none;
-  color: #f8fafc;
+  color: #aaa;
   font-size: 1.2rem;
   cursor: pointer;
   padding: 4px 8px;
@@ -560,10 +604,10 @@
 .modal-error {
   margin: 0 24px;
   padding: 10px 14px;
-  background: #7f1d1d;
-  border: 1px solid #991b1b;
+  background: rgba(255, 80, 80, 0.15);
+  border: 1px solid #ff5050;
   border-radius: 6px;
-  color: #ffffff;
+  color: #ff8080;
   font-size: 0.9rem;
 }
 
@@ -575,7 +619,7 @@
 
 .form-group label {
   font-size: 0.85rem;
-  color: #f8fafc;
+  color: #aaa;
   font-weight: 500;
 }
 
@@ -631,8 +675,8 @@
 }
 
 .btn-cancel {
-  background: #1f2937;
-  color: #f8fafc;
+  background: #333;
+  color: #ccc;
   border: none;
   padding: 10px 20px;
   border-radius: 6px;
@@ -641,11 +685,15 @@
 }
 
 .btn-cancel:hover {
-  background: #334155;
+  background: #444;
 }
 
 .btn-save {
+<<<<<<< dev
   background: #581c87;
+=======
+  background: #6c63ff;
+>>>>>>> main
   color: #fff;
   border: none;
   padding: 10px 24px;
@@ -656,7 +704,11 @@
 }
 
 .btn-save:hover {
+<<<<<<< dev
   background: #6b21a8;
+=======
+  background: #5a52e0;
+>>>>>>> main
 }
 
 .btn-save:disabled {
@@ -665,7 +717,11 @@
 }
 
 .btn-create {
+<<<<<<< dev
   background: #581c87;
+=======
+  background: #6c63ff;
+>>>>>>> main
   color: #fff;
   border: none;
   padding: 10px 20px;
@@ -679,13 +735,17 @@
 }
 
 .btn-create:hover {
+<<<<<<< dev
   background: #6b21a8;
+=======
+  background: #5a52e0;
+>>>>>>> main
 }
 
 .btn-link {
   background: none;
   border: none;
-  color: #ddd6fe;
+  color: #6c63ff;
   cursor: pointer;
   text-decoration: underline;
   font-size: inherit;
@@ -700,7 +760,7 @@
 
 .detail-list li {
   margin-bottom: 8px;
-  color: #e5e7eb;
+  color: #d1d5db;
 }
 
 /* Responsive */
