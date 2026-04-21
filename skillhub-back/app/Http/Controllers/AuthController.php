@@ -9,10 +9,12 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
+    private const FIELD_EMAIL = 'email';
+
     // POST /api/login
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        $credentials = $request->only(self::FIELD_EMAIL, 'password');
 
         if (!$token = auth('api')->attempt($credentials)) {
             return response()->json(['error' => 'Email ou mot de passe incorrect'], 401);
@@ -34,7 +36,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'nom'      => 'required|string|max:100',
             'prenom'   => 'required|string|max:100',
-            'email'    => 'required|email|unique:users',
+            self::FIELD_EMAIL => 'required|email|unique:users',
             'password' => 'required|string|min:6',
             'role'     => 'required|in:APPRENANT,FORMATEUR,ADMINISTRATEUR',
         ]);
@@ -46,7 +48,7 @@ class AuthController extends Controller
         $user = User::create([
             'nom'      => $request->nom,
             'prenom'   => $request->prenom,
-            'email'    => $request->email,
+            self::FIELD_EMAIL => $request->{self::FIELD_EMAIL},
             'password' => Hash::make($request->password),
             'role'     => $request->role,
         ]);
