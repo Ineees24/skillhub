@@ -10,7 +10,8 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        //Methode vide intentionnellement, pas de services à enregistrer pour le moment
+        //Accepté par laravel
     }
 
     public function boot(): void
