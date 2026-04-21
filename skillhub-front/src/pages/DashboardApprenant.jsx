@@ -3,74 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
 import {
   desinscrireAtelier,
-  fetchAteliers,
   fetchMesInscriptions,
 } from "../services/atelierService";
+import { getUser, logout } from "../services/authService";
 import { getCategoryVisualByKey } from "../utils/categoryVisuals";
 import "./Dashboard.css";
-
-const fallbackApprenantFormations = [
-  {
-    id: 1,
-    titre: "Introduction à React",
-    description:
-      "Découvrez les bases de React et créez votre première application interactive.",
-    categorie: "developpement",
-    duree: 4,
-    prix: 89,
-    statut: "en-cours",
-    dateInscription: "2024-02-20",
-    progression: 60,
-  },
-  {
-    id: 2,
-    titre: "UI Design avec Figma",
-    description:
-      "Maîtrisez Figma pour créer des interfaces modernes et professionnelles.",
-    categorie: "design",
-    duree: 3,
-    prix: 75,
-    statut: "termine",
-    dateInscription: "2024-01-15",
-    progression: 100,
-  },
-  {
-    id: 3,
-    titre: "SEO pour débutants",
-    description:
-      "Apprenez les techniques de référencement naturel pour améliorer votre visibilité.",
-    categorie: "marketing",
-    duree: 2,
-    prix: 49,
-    statut: "termine",
-    dateInscription: "2024-01-10",
-    progression: 100,
-  },
-  {
-    id: 4,
-    titre: "Communication assertive",
-    description:
-      "Développez votre capacité à communiquer avec confiance et clarté.",
-    categorie: "soft-skills",
-    duree: 3,
-    prix: 65,
-    statut: "en-cours",
-    dateInscription: "2024-02-25",
-    progression: 30,
-  },
-  {
-    id: 5,
-    titre: "Montage vidéo avec Premiere Pro",
-    description:
-      "Maîtrisez Premiere Pro pour créer des vidéos professionnelles.",
-    categorie: "creation-contenu",
-    duree: 6,
-    prix: 95,
-    statut: "termine",
-    dateInscription: "2024-01-05",
-    progression: 100,
-  },
-];
 
 const categories = {
   developpement: "Developpement",
@@ -90,9 +27,14 @@ const priceRanges = [
 
 const durationOptions = [2, 3, 4, 6, 8];
 
+function removeFormationById(formationsList, id) {
+  return formationsList.filter((formation) => formation.id !== id);
+}
+
 function DashboardApprenant() {
   const navigate = useNavigate();
-  const [formations, setFormations] = useState(fallbackApprenantFormations);
+  const user = getUser();
+  const [formations, setFormations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState("");
   const [search, setSearch] = useState("");
@@ -103,25 +45,6 @@ function DashboardApprenant() {
 
   useEffect(() => {
     let alive = true;
-    setLoading(true);
-    setApiError("");
-
-    const mapAteliersToDashboard = (rows) =>
-      rows.map((f, index) => {
-        const termine = index % 3 === 0;
-        const progression = termine ? 100 : 20 + ((index * 13) % 70);
-        return {
-          id: f.id,
-          titre: f.titre,
-          description: f.description || "",
-          categorie: f.categorie || "developpement",
-          duree: Number(f.duree || 0),
-          prix: Number(f.prix || 0),
-          statut: termine ? "termine" : "en-cours",
-          dateInscription: new Date().toISOString().slice(0, 10),
-          progression,
-        };
-      });
 
     fetchMesInscriptions()
       .then((data) => {
@@ -129,29 +52,15 @@ function DashboardApprenant() {
         const inscriptions = Array.isArray(data?.inscriptions)
           ? data.inscriptions
           : [];
-        if (inscriptions.length > 0) {
-          setFormations(inscriptions);
-          return;
+        setFormations(inscriptions);
+        if (inscriptions.length === 0) {
+          setApiError("Vous n'etes inscrit a aucune formation pour le moment.");
         }
-
-        return fetchAteliers().then((allData) => {
-          if (!alive) return;
-          const rows = Array.isArray(allData?.liste_atelier)
-            ? allData.liste_atelier
-            : [];
-          if (rows.length > 0) {
-            setFormations(mapAteliersToDashboard(rows));
-            setApiError(
-              "Aucune inscription trouvée, affichage de la liste générale.",
-            );
-          } else {
-            setApiError("Aucune formation récupérée depuis le backend.");
-          }
-        });
       })
       .catch(() => {
         if (!alive) return;
-        setApiError("Backend indisponible, affichage des données locales.");
+        setApiError("Impossible de charger vos inscriptions pour le moment.");
+        setFormations([]);
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -228,17 +137,13 @@ function DashboardApprenant() {
 
   const handleDurationChange = (duree) => {
     setSelectedDurations((prev) =>
-      prev.includes(duree)
-        ? prev.filter((d) => d !== duree)
-        : [...prev, duree],
+      prev.includes(duree) ? prev.filter((d) => d !== duree) : [...prev, duree],
     );
   };
 
   const handlePriceChange = (price) => {
     setSelectedPrices((prev) =>
-      prev.includes(price)
-        ? prev.filter((p) => p !== price)
-        : [...prev, price],
+      prev.includes(price) ? prev.filter((p) => p !== price) : [...prev, price],
     );
   };
 
@@ -262,6 +167,15 @@ function DashboardApprenant() {
     navigate(`/apprenant/suivi/${id}`);
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Erreur lors de la deconnexion", error);
+    }
+  };
+
   const handleNePlusSuivre = (id) => {
     const ok = globalThis.confirm(
       "Voulez-vous vraiment ne plus suivre cette formation ?",
@@ -269,7 +183,7 @@ function DashboardApprenant() {
     if (!ok) return;
     desinscrireAtelier(id)
       .then(() => {
-        setFormations((prev) => prev.filter((f) => f.id !== id));
+        setFormations(removeFormationById(formations, id));
       })
       .catch((err) => {
         const msg =
@@ -293,13 +207,21 @@ function DashboardApprenant() {
       <header className="dashboard-header">
         <div className="container">
           <h1 className="dashboard-title">
-            <i className="fa-solid fa-user-graduate" aria-hidden="true"></i>
-            {" "}Tableau de bord Apprenant
+            <i className="fa-solid fa-user-graduate" aria-hidden="true"></i>{" "}
+            Bonjour {user?.prenom} {user?.nom}
           </h1>
           <nav className="dashboard-nav">
             <Link to="/apprenant" className="active">
               Mes formations
             </Link>
+            <Link to="/ateliers">Catalogue</Link>
+            <button
+              onClick={handleLogout}
+              className="btn-reset"
+              style={{ width: "auto", padding: "8px 16px", marginTop: 0 }}
+            >
+              Deconnexion
+            </button>
           </nav>
         </div>
       </header>
@@ -307,7 +229,10 @@ function DashboardApprenant() {
       <div className="container dashboard-content">
         <div className="dashboard-stats">
           <div className="stat-card">
-            <i className="fa-solid fa-book-open stat-icon" aria-hidden="true"></i>
+            <i
+              className="fa-solid fa-book-open stat-icon"
+              aria-hidden="true"
+            ></i>
             <h3>{stats.total}</h3>
             <p>Formations totales</p>
           </div>
@@ -317,13 +242,19 @@ function DashboardApprenant() {
             <p>En cours</p>
           </div>
           <div className="stat-card">
-            <i className="fa-solid fa-circle-check stat-icon" aria-hidden="true"></i>
+            <i
+              className="fa-solid fa-circle-check stat-icon"
+              aria-hidden="true"
+            ></i>
             <h3>{stats.termine}</h3>
             <p>Terminées</p>
           </div>
           <div className="stat-card">
-            <i className="fa-solid fa-chart-line stat-icon" aria-hidden="true"></i>
-            <h3>{stats.progressionMoyenne}{" "}%</h3>
+            <i
+              className="fa-solid fa-chart-line stat-icon"
+              aria-hidden="true"
+            ></i>
+            <h3>{stats.progressionMoyenne} %</h3>
             <p>Progression moyenne</p>
           </div>
         </div>
@@ -385,7 +316,7 @@ function DashboardApprenant() {
                     checked={selectedDurations.includes(duree.toString())}
                     onChange={() => handleDurationChange(duree.toString())}
                   />{" "}
-                  {duree}{" "}heures
+                  {duree} heures
                 </label>
               ))}
             </div>
@@ -412,9 +343,9 @@ function DashboardApprenant() {
           <main className="formations-list">
             <div className="results-header">
               <p>
-                {filteredFormations.length}{" "}
-                formation{filteredFormations.length > 1 ? "s" : ""}{" "}
-                trouvée{filteredFormations.length > 1 ? "s" : ""}
+                {filteredFormations.length} formation
+                {filteredFormations.length > 1 ? "s" : ""} trouvée
+                {filteredFormations.length > 1 ? "s" : ""}
               </p>
               {loading && <p>Chargement des formations...</p>}
               {!loading && apiError && (
@@ -441,8 +372,8 @@ function DashboardApprenant() {
                         <i
                           className={`${getCategoryVisualByKey(formation.categorie).icon} meta-icon`}
                           aria-hidden="true"
-                        ></i>
-                        {" "}{categories[formation.categorie]}
+                        ></i>{" "}
+                        {categories[formation.categorie]}
                       </span>
                     </div>
 
@@ -456,8 +387,8 @@ function DashboardApprenant() {
                         <i
                           className="fa-solid fa-clock meta-icon"
                           aria-hidden="true"
-                        ></i>
-                        {" "}{formation.duree}h
+                        ></i>{" "}
+                        {formation.duree}h
                       </span>
                       <span className="formation-price">{formation.prix}€</span>
                     </div>
@@ -476,7 +407,9 @@ function DashboardApprenant() {
 
                     <p className="formation-date">
                       Inscrit le{" "}
-                      {new Date(formation.dateInscription).toLocaleDateString("fr-FR")}
+                      {new Date(formation.dateInscription).toLocaleDateString(
+                        "fr-FR",
+                      )}
                     </p>
 
                     <div className="formation-actions">
