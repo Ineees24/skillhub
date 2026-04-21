@@ -25,12 +25,12 @@ class AtelierController extends Controller
             ->with(['formateur', 'categorie'])
             ->get();
 
-        $rows = $formations->map(fn (Formation $f) => $this->mapFormationRow($f));
+        $rows = $formations->map(fn(Formation $f) => $this->mapFormationRow($f));
 
 
         if ($request->query('mine') === '1' && $user) {
             $uid = (int) $user->id;
-            $rows = $rows->filter(fn (array $row) => (int) $row['idUtilisateur'] === $uid)->values();
+            $rows = $rows->filter(fn(array $row) => (int) $row['idUtilisateur'] === $uid)->values();
 
             $this->activityLog->log(
                 $user->id,
@@ -42,7 +42,7 @@ class AtelierController extends Controller
 
         if ($request->filled('categorie')) {
             $categorie = htmlspecialchars(trim($request->query('categorie')), ENT_QUOTES, 'UTF-8');
-            $rows = $rows->filter(fn (array $row) => $row['categorie'] === $categorie)->values();
+            $rows = $rows->filter(fn(array $row) => $row['categorie'] === $categorie)->values();
 
             $this->activityLog->log(
                 $user?->id,
@@ -75,7 +75,7 @@ class AtelierController extends Controller
         ]);
     }
 
- 
+
     public function detail(Request $request, int $id)
     {
         $formation = Formation::query()
@@ -115,14 +115,14 @@ class AtelierController extends Controller
         return response()->json(array_merge(
             $this->mapFormationRow($formation),
             [
-            'apprenants' => $inscrits,
-            'vues' => $vues,
-            'modules' => $modules,
+                'apprenants' => $inscrits,
+                'vues' => $vues,
+                'modules' => $modules,
             ]
         ));
     }
 
-   
+
     public function logActivity(Request $request)
     {
         $action = $request->input('action', '');
@@ -145,7 +145,7 @@ class AtelierController extends Controller
         return response()->json(['success' => true]);
     }
 
-  
+
     public function activityLogs(Request $request)
     {
         $user = auth('api')->user();
@@ -159,7 +159,7 @@ class AtelierController extends Controller
         ]);
     }
 
-    
+
     public function inscrire(int $id)
     {
         $user = auth('api')->user();
@@ -200,7 +200,7 @@ class AtelierController extends Controller
         return response()->json(['message' => $message], $status);
     }
 
-    
+
     public function desinscrire(int $id)
     {
         $user = auth('api')->user();
@@ -235,7 +235,7 @@ class AtelierController extends Controller
         return response()->json(['message' => $message], $status);
     }
 
-   
+
     public function mesInscriptions()
     {
         $user = auth('api')->user();
@@ -294,7 +294,7 @@ class AtelierController extends Controller
     {
         $formateur = $f->formateur;
         $nomFormateur = $formateur
-            ? trim(($formateur->nom ?? '').' '.($formateur->prenom ?? ''))
+            ? trim(($formateur->nom ?? '') . ' ' . ($formateur->prenom ?? ''))
             : '';
         $inscrits = 0;
         if (Schema::hasTable('inscription')) {
@@ -389,5 +389,4 @@ class AtelierController extends Controller
 
         return strtolower((string) $user->role);
     }
-
 }
