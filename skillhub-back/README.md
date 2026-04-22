@@ -5,7 +5,7 @@ Le backend permet de gerer l'authentification et les operations metier autour de
 
 ## Technologies utilisees
 
-- Laravel 11
+- Laravel 12
 - JWT Authentication (`tymon/jwt-auth`)
 - MySQL
 - PHPUnit pour les tests
