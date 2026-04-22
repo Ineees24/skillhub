@@ -25,8 +25,14 @@ function firstString(values) {
 function extractBearerToken(authHeader) {
   const header = pickString(authHeader);
   if (!header) return null;
-  const match = /^Bearer\s+(.+)$/i.exec(header);
-  return pickString(match?.[1] ?? header);
+  const lowerHeader = header.toLowerCase();
+  const bearerPrefix = "bearer ";
+
+  if (!lowerHeader.startsWith(bearerPrefix)) {
+    return header;
+  }
+
+  return pickString(header.slice(bearerPrefix.length).trimStart());
 }
 
 function extractTokenFromNode(node, keys) {
