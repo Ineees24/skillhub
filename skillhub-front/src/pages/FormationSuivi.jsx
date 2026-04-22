@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
-import { categories } from '../data/ateliersData'
-import { fetchAtelierDetail } from '../services/atelierService'
-import '../styles/skillhub.css'
-import './FormationDetail.css'
+import { useEffect, useState } from "react";
+import PropTypes from "prop-types";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { categories } from "../data/ateliersData";
+import { fetchAtelierDetail } from "../services/atelierService";
+import "../styles/skillhub.css";
+import "./FormationDetail.css";
 
 function StatItem({ label, value }) {
   return (
@@ -11,37 +12,42 @@ function StatItem({ label, value }) {
       <span className="fd-stat-label">{label}</span>
       <span className="fd-stat-value">{value}</span>
     </div>
-  )
+  );
 }
 
+StatItem.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.node.isRequired,
+};
+
 export default function FormationSuivi() {
-  const { id } = useParams()
-  const navigate = useNavigate()
-  const [detail, setDetail] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [detail, setDetail] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    let alive = true
-    setLoading(true)
-    setError('')
-    setDetail(null)
+    let alive = true;
+    setLoading(true);
+    setError("");
+    setDetail(null);
 
     fetchAtelierDetail(id)
       .then((data) => {
-        if (alive) setDetail(data)
+        if (alive) setDetail(data);
       })
       .catch(() => {
-        if (alive) setError('Impossible de charger la page de suivi.')
+        if (alive) setError("Impossible de charger la page de suivi.");
       })
       .finally(() => {
-        if (alive) setLoading(false)
-      })
+        if (alive) setLoading(false);
+      });
 
     return () => {
-      alive = false
-    }
-  }, [id])
+      alive = false;
+    };
+  }, [id]);
 
   if (loading) {
     return (
@@ -53,7 +59,7 @@ export default function FormationSuivi() {
           </div>
         </div>
       </main>
-    )
+    );
   }
 
   if (!detail || error) {
@@ -62,18 +68,28 @@ export default function FormationSuivi() {
         <div className="container">
           <div className="fd-empty-state">
             <h1>Suivi indisponible</h1>
-            <p>{error || 'Cette formation est introuvable ou plus accessible.'}</p>
-            <button type="button" className="btn btn-primary" onClick={() => navigate('/apprenant')}>
+            <p>
+              {error || "Cette formation est introuvable ou plus accessible."}
+            </p>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => navigate("/apprenant")}
+            >
               Retour au tableau de bord
             </button>
           </div>
         </div>
       </main>
-    )
+    );
   }
 
-  const progression = Math.min(100, Math.max(0, Number(detail.progression ?? 0)))
-  const categoryLabel = categories[detail.categorie] || detail.categorie || 'Formation'
+  const progression = Math.min(
+    100,
+    Math.max(0, Number(detail.progression ?? 0)),
+  );
+  const categoryLabel =
+    categories[detail.categorie] || detail.categorie || "Formation";
 
   return (
     <main className="fd-page">
@@ -99,17 +115,24 @@ export default function FormationSuivi() {
             <span className="fd-badge">{categoryLabel}</span>
             <h1>{detail.titre}</h1>
             <p className="fd-desc">
-              {detail.description || 'Aucune description fournie pour cette formation.'}
+              {detail.description ||
+                "Aucune description fournie pour cette formation."}
             </p>
             <div className="fd-stats">
-              <StatItem label="Formateur" value={detail.formateur || '—'} />
-              <StatItem label="Niveau" value={detail.niveau || '—'} />
-              <StatItem label="Apprenants" value={String(detail.apprenants ?? 0)} />
+              <StatItem label="Formateur" value={detail.formateur || "—"} />
+              <StatItem label="Niveau" value={detail.niveau || "—"} />
+              <StatItem
+                label="Apprenants"
+                value={String(detail.apprenants ?? 0)}
+              />
               <StatItem label="Vues" value={String(detail.vues ?? 0)} />
             </div>
           </header>
 
-          <section className="fd-section fd-modules" aria-labelledby="fd-suivi-modules">
+          <section
+            className="fd-section fd-modules"
+            aria-labelledby="fd-suivi-modules"
+          >
             <h2 id="fd-suivi-modules" className="fd-section-title">
               Programme — modules
             </h2>
@@ -123,11 +146,16 @@ export default function FormationSuivi() {
                 ))}
               </ul>
             ) : (
-              <p className="fd-empty-modules">Aucun module n’est encore publié pour cette formation.</p>
+              <p className="fd-empty-modules">
+                Aucun module n’est encore publié pour cette formation.
+              </p>
             )}
           </section>
 
-          <section className="fd-section fd-progress-section" aria-labelledby="fd-suivi-progress">
+          <section
+            className="fd-section fd-progress-section"
+            aria-labelledby="fd-suivi-progress"
+          >
             <h2 id="fd-suivi-progress" className="fd-section-title">
               Votre progression
             </h2>
@@ -135,19 +163,17 @@ export default function FormationSuivi() {
               <span className="fd-progress-percent">{progression}%</span>
               <span className="fd-progress-caption">complété</span>
             </div>
-            <div
+            <progress
               className="fd-progress-track"
-              role="progressbar"
-              aria-valuenow={progression}
-              aria-valuemin={0}
-              aria-valuemax={100}
+              value={progression}
+              max={100}
               aria-labelledby="fd-suivi-progress"
             >
-              <div className="fd-progress-fill" style={{ width: `${progression}%` }} />
-            </div>
+              {progression}%
+            </progress>
           </section>
         </div>
       </div>
     </main>
-  )
+  );
 }
