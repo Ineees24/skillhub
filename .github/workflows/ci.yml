@@ -49,6 +49,13 @@ jobs:
           extensions: mbstring, pdo, sqlite, mongodb-2.2.0
           coverage: pcov
 
+      - name: Prepare backend test environment
+        working-directory: skillhub-back
+        run: |
+          [ -f .env ] || cp .env.example .env
+          mkdir -p database
+          touch database/database.sqlite
+
       - name: Install backend dependencies
         working-directory: skillhub-back
         run: composer install --no-interaction --no-progress --prefer-dist
