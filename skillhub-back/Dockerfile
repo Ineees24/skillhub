@@ -17,7 +17,11 @@ RUN apt-get update \
         re2c \
         unzip \
     && pecl install mongodb \
+    && pecl install pcov \
     && docker-php-ext-enable mongodb \
+    && docker-php-ext-enable pcov \
+    && echo "pcov.enabled=1" > /usr/local/etc/php/conf.d/pcov.ini \
+    && echo "pcov.directory=/var/www/html/app" >> /usr/local/etc/php/conf.d/pcov.ini \
     && docker-php-ext-install pdo pdo_mysql mbstring zip \
     && rm -rf /var/lib/apt/lists/*
 
