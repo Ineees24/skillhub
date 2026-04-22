@@ -1,15 +1,13 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import DashboardFormateur from './pages/DashboardFormateur'
-import DashboardApprenant from './pages/DashboardApprenant'
-import Login from './pages/Login'
-import Home from './pages/Home'
-import Ateliers from './pages/Ateliers'
-import FormationDetail from './pages/FormationDetail'
-import FormationSuivi from './pages/FormationSuivi'
-import PrivateRoute from './components/PrivateRoute'
-import PublicLayout from './components/PublicLayout'
-import { getToken, getUser } from './services/authService'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import DashboardFormateur from "./pages/DashboardFormateur";
+import DashboardApprenant from "./pages/DashboardApprenant";
+import Home from "./pages/Home";
+import Ateliers from "./pages/Ateliers";
+import FormationDetail from "./pages/FormationDetail";
+import FormationSuivi from "./pages/FormationSuivi";
+import PrivateRoute from "./components/PrivateRoute";
+import PublicLayout from "./components/PublicLayout";
+import "./App.css";
 
 function App() {
   return (
@@ -20,11 +18,6 @@ function App() {
           <Route path="/ateliers" element={<Ateliers />} />
           <Route path="/ateliers/:id" element={<FormationDetail />} />
         </Route>
-
-        <Route
-          path="/login"
-          element={<LoginRoute />}
-        />
 
         <Route
           path="/formateur"
@@ -55,21 +48,7 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-function LoginRoute() {
-  const token = getToken()
-  const user = getUser()
-  if (token && user) {
-    return (
-      <Navigate
-        to={user.role === 'FORMATEUR' ? '/formateur' : '/apprenant'}
-        replace
-      />
-    )
-  }
-  return <Login />
-}
-
-export default App
+export default App;
