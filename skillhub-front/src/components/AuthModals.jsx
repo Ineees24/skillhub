@@ -85,10 +85,13 @@ export default function AuthModals({
         className={`modal${modal === "connexion" ? " active" : ""}`}
         id="modal-connexion"
         aria-modal="true"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) onClose();
-        }}
       >
+        <button
+          type="button"
+          className="modal-backdrop-close"
+          onClick={onClose}
+          aria-label="Fermer la fenetre de connexion"
+        />
         <div className="modal-content">
           <button
             type="button"
@@ -104,7 +107,13 @@ export default function AuthModals({
           <p>Connectez-vous à votre compte SkillHub</p>
 
           {connError && (
-            <p style={{ color: "#f87171", marginBottom: "12px", fontSize: "0.9rem" }}>
+            <p
+              style={{
+                color: "#f87171",
+                marginBottom: "12px",
+                fontSize: "0.9rem",
+              }}
+            >
               {connError}
             </p>
           )}
@@ -120,16 +129,17 @@ export default function AuthModals({
               const required = form.querySelectorAll("[required]");
               let valid = true;
               required.forEach((field) => {
-                if (!field.value) {
+                if (field.value) {
+                  setFieldBorder(field, true);
+                } else {
                   setFieldBorder(field, false);
                   valid = false;
-                } else {
-                  setFieldBorder(field, true);
                 }
               });
               if (!valid) return;
               const email = connEmail.trim();
-              const password = form.querySelector("#login-password")?.value ?? "";
+              const password =
+                form.querySelector("#login-password")?.value ?? "";
               setConnLoading(true);
               try {
                 await login(email, password);
@@ -168,20 +178,38 @@ export default function AuthModals({
 
             <div>
               <label>
-                <input type="checkbox" disabled={connLoading} /> Se souvenir de moi
+                <input type="checkbox" disabled={connLoading} /> Se souvenir de
+                moi
               </label>
             </div>
 
-            <button type="submit" className="btn btn-primary" disabled={connLoading}>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={connLoading}
+            >
               {connLoading ? "Connexion…" : "Se connecter"}
             </button>
 
-            <p style={{ textAlign: "center", marginTop: "15px", fontSize: "0.9rem" }}>
+            <p
+              style={{
+                textAlign: "center",
+                marginTop: "15px",
+                fontSize: "0.9rem",
+              }}
+            >
               Pas encore de compte ?{" "}
               <button
                 type="button"
                 id="switch-to-signup"
-                style={{ color: "#6366f1", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", fontSize: "inherit" }}
+                style={{
+                  color: "#6366f1",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                  fontSize: "inherit",
+                }}
                 onClick={() => openModal("inscription")}
               >
                 S&apos;inscrire
@@ -195,10 +223,13 @@ export default function AuthModals({
         className={`modal${modal === "inscription" ? " active" : ""}`}
         id="modal-inscription"
         aria-modal="true"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) onClose();
-        }}
       >
+        <button
+          type="button"
+          className="modal-backdrop-close"
+          onClick={onClose}
+          aria-label="Fermer la fenetre d'inscription"
+        />
         <div className="modal-content">
           <button
             type="button"
@@ -214,7 +245,13 @@ export default function AuthModals({
           <p id="inscription-subtitle">{inscriptionSubtitle}</p>
 
           {regError && (
-            <p style={{ color: "#f87171", marginBottom: "12px", fontSize: "0.9rem" }}>
+            <p
+              style={{
+                color: "#f87171",
+                marginBottom: "12px",
+                fontSize: "0.9rem",
+              }}
+            >
               {regError}
             </p>
           )}
@@ -232,18 +269,21 @@ export default function AuthModals({
               required.forEach((field) => {
                 const isCheckbox = field.type === "checkbox";
                 const ok = isCheckbox ? field.checked : field.value;
-                if (!ok) {
+                if (ok) {
+                  setFieldBorder(field, true);
+                } else {
                   setFieldBorder(field, false);
                   valid = false;
-                } else {
-                  setFieldBorder(field, true);
                 }
               });
               if (!valid) return;
               const role = form.querySelector("#signup-role")?.value ?? "";
-              const fullName = form.querySelector("#signup-name")?.value?.trim() ?? "";
-              const email = form.querySelector("#signup-email")?.value?.trim() ?? "";
-              const password = form.querySelector("#signup-password")?.value ?? "";
+              const fullName =
+                form.querySelector("#signup-name")?.value?.trim() ?? "";
+              const email =
+                form.querySelector("#signup-email")?.value?.trim() ?? "";
+              const password =
+                form.querySelector("#signup-password")?.value ?? "";
               const { nom, prenom } = splitNomPrenom(fullName);
               if (!nom) {
                 setRegError("Indiquez au moins un nom.");
@@ -263,7 +303,12 @@ export default function AuthModals({
           >
             <div>
               <label htmlFor="signup-role">Je suis :</label>
-              <select id="signup-role" required defaultValue="" disabled={regLoading}>
+              <select
+                id="signup-role"
+                required
+                defaultValue=""
+                disabled={regLoading}
+              >
                 <option value="">Choisissez...</option>
                 <option value="APPRENANT">Apprenant·e</option>
                 <option value="FORMATEUR">Formateur·rice</option>
@@ -272,12 +317,22 @@ export default function AuthModals({
 
             <div>
               <label htmlFor="signup-name">Nom et prénom</label>
-              <input id="signup-name" type="text" required disabled={regLoading} />
+              <input
+                id="signup-name"
+                type="text"
+                required
+                disabled={regLoading}
+              />
             </div>
 
             <div>
               <label htmlFor="signup-email">Email</label>
-              <input id="signup-email" type="email" required disabled={regLoading} />
+              <input
+                id="signup-email"
+                type="email"
+                required
+                disabled={regLoading}
+              />
             </div>
 
             <div>
@@ -305,15 +360,30 @@ export default function AuthModals({
             <div>
               <span>Format :</span>
               <label>
-                <input type="radio" name="format" value="visio" disabled={regLoading} />{" "}
+                <input
+                  type="radio"
+                  name="format"
+                  value="visio"
+                  disabled={regLoading}
+                />{" "}
                 Visio
               </label>
               <label>
-                <input type="radio" name="format" value="presentiel" disabled={regLoading} />{" "}
+                <input
+                  type="radio"
+                  name="format"
+                  value="presentiel"
+                  disabled={regLoading}
+                />{" "}
                 Présentiel
               </label>
               <label>
-                <input type="radio" name="format" value="both" disabled={regLoading} />{" "}
+                <input
+                  type="radio"
+                  name="format"
+                  value="both"
+                  disabled={regLoading}
+                />{" "}
                 Peu importe
               </label>
             </div>
@@ -325,19 +395,41 @@ export default function AuthModals({
               </label>
             </div>
 
-            <button type="submit" className="btn btn-primary" disabled={regLoading}>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={regLoading}
+            >
               {regLoading ? "Création…" : "Créer mon compte"}
             </button>
 
-            <p style={{ textAlign: "center", marginTop: "15px", fontSize: "0.9rem" }}>
+            <p
+              style={{
+                textAlign: "center",
+                marginTop: "15px",
+                fontSize: "0.9rem",
+              }}
+            >
               Déjà un compte ?{" "}
               <button
                 type="button"
                 id="switch-to-login"
-                style={{ color: "#6366f1", background: "none", border: "none", cursor: "pointer", textDecoration: "underline", fontSize: "inherit" }}
-                onClick={() => openModal("connexion", {
-                  prefillEmail: formInscriptionRef.current?.querySelector("#signup-email")?.value?.trim() ?? "",
-                })}
+                style={{
+                  color: "#6366f1",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                  fontSize: "inherit",
+                }}
+                onClick={() =>
+                  openModal("connexion", {
+                    prefillEmail:
+                      formInscriptionRef.current
+                        ?.querySelector("#signup-email")
+                        ?.value?.trim() ?? "",
+                  })
+                }
               >
                 Se connecter
               </button>
