@@ -27,8 +27,6 @@ const priceRanges = [
 
 const durationOptions = [2, 3, 4, 6, 8];
 
-<<<<<<< dev
-=======
 function mapAteliersToDashboard(rows) {
   return rows.map((formation, index) => {
     const termine = index % 3 === 0;
@@ -114,8 +112,6 @@ function matchesFilters(formation, filters) {
 
   return true;
 }
-
->>>>>>> main
 function removeFormationById(formationsList, id) {
   return formationsList.filter((formation) => formation.id !== id);
 }
@@ -261,11 +257,7 @@ function DashboardApprenant() {
         <div className="container">
           <h1 className="dashboard-title">
             <i className="fa-solid fa-user-graduate" aria-hidden="true"></i>{" "}
-<<<<<<< dev
             Bonjour {user?.prenom} {user?.nom}
-=======
-            Tableau de bord Apprenant
->>>>>>> main
           </h1>
           <nav className="dashboard-nav">
             <Link to="/">Accueil</Link>
@@ -273,11 +265,7 @@ function DashboardApprenant() {
               Mes formations
             </Link>
             <Link to="/ateliers">Catalogue</Link>
-            <button
-              onClick={handleLogout}
-              className="btn-reset"
-              style={{ width: "auto", padding: "8px 16px", marginTop: 0 }}
-            >
+            <button onClick={handleLogout} className="btn-reset btn-logout">
               Deconnexion
             </button>
           </nav>

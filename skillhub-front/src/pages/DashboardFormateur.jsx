@@ -664,11 +664,7 @@ function DashboardFormateur() {
             <Link to="/formateur" className="active">
               Mes formations
             </Link>
-            <button
-              onClick={handleLogout}
-              className="btn-reset"
-              style={{ width: "auto", padding: "8px 16px" }}
-            >
+            <button onClick={handleLogout} className="btn-reset btn-logout">
               Déconnexion
             </button>
           </nav>
@@ -707,17 +703,13 @@ function DashboardFormateur() {
         </div>
 
         {/* Barre de recherche + bouton créer */}
-        <div
-          className="search-section"
-          style={{ display: "flex", gap: "12px", alignItems: "center" }}
-        >
+        <div className="search-section dashboard-toolbar">
           <input
             type="text"
             placeholder="Rechercher une formation..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="search-input"
-            style={{ flex: 1 }}
           />
           <button
             className="btn-create"
