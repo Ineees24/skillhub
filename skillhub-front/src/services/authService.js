@@ -2,11 +2,24 @@ import api from "./axios";
 
 const TOKEN_KEYS = ["access_token", "token", "auth_token"];
 
+function isRecord(value) {
+  return value !== null && typeof value === "object";
+}
+
 function pickString(value) {
   if (typeof value !== "string") return null;
   const v = value.trim();
   if (!v || v === "undefined" || v === "null") return null;
   return v;
+}
+
+function firstString(values) {
+  for (const value of values) {
+    const stringValue = pickString(value);
+    if (stringValue) return stringValue;
+  }
+
+  return null;
 }
 
 function extractBearerToken(authHeader) {
@@ -17,54 +30,36 @@ function extractBearerToken(authHeader) {
 }
 
 function extractTokenFromNode(node, keys) {
-  if (!node || typeof node !== "object") return null;
-
-  for (const key of keys) {
-    const value = pickString(node[key]);
-    if (value) return value;
-  }
-
-  return null;
+  if (!isRecord(node)) return null;
+  return firstString(keys.map((key) => node[key]));
 }
 
-function extractTokenFromNestedCandidates(data) {
-  const nestedCandidates = [
-    data?.data,
-    data?.result,
-    data?.authorization,
-    data?.authorisation,
-    data?.meta,
-  ];
-
-  for (const node of nestedCandidates) {
-    const token = extractTokenFromNode(node, TOKEN_KEYS);
+function extractTokenFromCandidates(candidates, keys) {
+  for (const node of candidates) {
+    const token = extractTokenFromNode(node, keys);
     if (token) return token;
   }
 
   return null;
 }
 
-function extractTokenFromAlternativeKeys(data) {
-  const altKeys = ["accessToken", "jwt", "plainTextToken"];
-
-  for (const key of altKeys) {
-    const direct = pickString(data[key]);
-    if (direct) return direct;
-
-    const nested = pickString(data?.data?.[key]);
-    if (nested) return nested;
-  }
-
-  return null;
-}
-
 function extractToken(data) {
-  if (!data || typeof data !== "object") return null;
+  if (!isRecord(data)) return null;
+
+  const nestedCandidates = [
+    data,
+    data?.data,
+    data?.result,
+    data?.authorization,
+    data?.authorisation,
+    data?.meta,
+  ];
+  const alternativeCandidates = [data, data?.data];
+  const alternativeKeys = ["accessToken", "jwt", "plainTextToken"];
 
   return (
-    extractTokenFromNode(data, TOKEN_KEYS) ??
-    extractTokenFromNestedCandidates(data) ??
-    extractTokenFromAlternativeKeys(data)
+    extractTokenFromCandidates(nestedCandidates, TOKEN_KEYS) ??
+    extractTokenFromCandidates(alternativeCandidates, alternativeKeys)
   );
 }
 
