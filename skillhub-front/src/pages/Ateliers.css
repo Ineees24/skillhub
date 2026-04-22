@@ -246,9 +246,9 @@
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(109, 40, 217, 0.1));
-  color: #c084fc;
-  border: 1px solid rgba(168, 85, 247, 0.3);
+  background: #7c3aed;
+  color: #ffffff;
+  border: 1px solid #7c3aed;
   border-radius: 20px;
   font-size: 0.8rem;
   margin-bottom: 12px;
@@ -257,8 +257,9 @@
 }
 
 .atelier-card:hover .atelier-category {
-  background: rgba(168, 85, 247, 0.3);
-  border-color: #c084fc;
+  background: #6d28d9;
+  border-color: #7c3aed;
+  color: #ffffff;
 }
 
 .atelier-card h3 {
