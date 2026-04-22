@@ -2,11 +2,24 @@ import api from "./axios";
 
 const TOKEN_KEYS = ["access_token", "token", "auth_token"];
 
+function isRecord(value) {
+  return value !== null && typeof value === "object";
+}
+
 function pickString(value) {
   if (typeof value !== "string") return null;
   const v = value.trim();
   if (!v || v === "undefined" || v === "null") return null;
   return v;
+}
+
+function firstString(values) {
+  for (const value of values) {
+    const stringValue = pickString(value);
+    if (stringValue) return stringValue;
+  }
+
+  return null;
 }
 
 function extractBearerToken(authHeader) {
@@ -16,39 +29,38 @@ function extractBearerToken(authHeader) {
   return pickString(match?.[1] ?? header);
 }
 
-function extractToken(data) {
-  if (!data || typeof data !== "object") return null;
+function extractTokenFromNode(node, keys) {
+  if (!isRecord(node)) return null;
+  return firstString(keys.map((key) => node[key]));
+}
 
-  for (const key of TOKEN_KEYS) {
-    const direct = pickString(data[key]);
-    if (direct) return direct;
+function extractTokenFromCandidates(candidates, keys) {
+  for (const node of candidates) {
+    const token = extractTokenFromNode(node, keys);
+    if (token) return token;
   }
 
+  return null;
+}
+
+function extractToken(data) {
+  if (!isRecord(data)) return null;
+
   const nestedCandidates = [
+    data,
     data?.data,
     data?.result,
     data?.authorization,
     data?.authorisation,
     data?.meta,
   ];
+  const alternativeCandidates = [data, data?.data];
+  const alternativeKeys = ["accessToken", "jwt", "plainTextToken"];
 
-  for (const node of nestedCandidates) {
-    if (!node || typeof node !== "object") continue;
-    for (const key of TOKEN_KEYS) {
-      const nested = pickString(node[key]);
-      if (nested) return nested;
-    }
-  }
-
-  const altKeys = ["accessToken", "jwt", "plainTextToken"];
-  for (const key of altKeys) {
-    const alt = pickString(data[key]);
-    if (alt) return alt;
-    const nestedAlt = pickString(data?.data?.[key]);
-    if (nestedAlt) return nestedAlt;
-  }
-
-  return null;
+  return (
+    extractTokenFromCandidates(nestedCandidates, TOKEN_KEYS) ??
+    extractTokenFromCandidates(alternativeCandidates, alternativeKeys)
+  );
 }
 
 function extractUser(data, fallbackUser) {

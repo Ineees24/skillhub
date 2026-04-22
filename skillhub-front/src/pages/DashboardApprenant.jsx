@@ -268,6 +268,7 @@ function DashboardApprenant() {
 >>>>>>> main
           </h1>
           <nav className="dashboard-nav">
+            <Link to="/">Accueil</Link>
             <Link to="/apprenant" className="active">
               Mes formations
             </Link>

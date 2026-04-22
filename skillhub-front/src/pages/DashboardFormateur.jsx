@@ -660,6 +660,7 @@ function DashboardFormateur() {
             Bonjour {user?.prenom} {user?.nom}
           </h1>
           <nav className="dashboard-nav">
+            <Link to="/">Accueil</Link>
             <Link to="/formateur" className="active">
               Mes formations
             </Link>

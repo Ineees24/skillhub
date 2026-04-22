@@ -1,7 +1,21 @@
 FROM php:8.2-cli
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends git unzip libzip-dev libonig-dev libxml2-dev $PHPIZE_DEPS \
+    && apt-get install -y --no-install-recommends \
+        autoconf \
+        dpkg-dev \
+        file \
+        g++ \
+        gcc \
+        git \
+        libc-dev \
+        libonig-dev \
+        libxml2-dev \
+        libzip-dev \
+        make \
+        pkg-config \
+        re2c \
+        unzip \
     && pecl install mongodb \
     && docker-php-ext-enable mongodb \
     && docker-php-ext-install pdo pdo_mysql mbstring zip \
@@ -12,9 +26,11 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 COPY composer.json composer.lock ./
-RUN composer install --no-interaction --no-progress --prefer-dist
+RUN composer install --no-interaction --no-progress --prefer-dist --no-scripts
 
 COPY . .
+
+RUN php artisan package:discover --ansi
 
 EXPOSE 8000
 
