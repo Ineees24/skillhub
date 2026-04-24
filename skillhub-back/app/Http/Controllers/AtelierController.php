@@ -185,6 +185,17 @@ class AtelierController extends Controller
         $message = 'Vous etes deja inscrit a cette formation.';
 
         if (! $already) {
+            // Vérifier la limite de 5 inscriptions simultanées
+            $inscriptionCount = DB::table('inscription')
+                ->where('idUtilisateur', $user->id)
+                ->count();
+
+            if ($inscriptionCount >= 5) {
+                return response()->json([
+                    'message' => 'Vous avez atteint la limite de 5 formations simultanées. Veuillez vous désinscrire d\'une formation avant de vous inscrire à une nouvelle.'
+                ], 400);
+            }
+
             DB::table('inscription')->insert($this->buildInscriptionPayload((int) $user->id, (int) $formation->id));
 
             // MongoDB — historisation
