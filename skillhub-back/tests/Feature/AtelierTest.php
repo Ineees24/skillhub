@@ -117,6 +117,30 @@ class AtelierTest extends TestCase
              ->assertStatus(401);
     }
 
+    public function test_apprenant_ne_peut_pas_sinscrire_a_plus_de_5_formations()
+    {
+        [$user, $token] = $this->actingAsApprenant();
+        
+        // Créer 6 formations
+        $formations = Formation::factory(6)->create();
+        
+        // Inscrire l'apprenant aux 5 premières formations
+        foreach ($formations->take(5) as $formation) {
+            $this->withHeader('Authorization', "Bearer $token")
+                 ->postJson("/api/ateliers/{$formation->id}/inscription")
+                 ->assertStatus(201);
+        }
+        
+        // Essayer de s'inscrire à la 6e formation - doit retourner 400
+        $sixiemeFormation = $formations->last();
+        $this->withHeader('Authorization', "Bearer $token")
+             ->postJson("/api/ateliers/{$sixiemeFormation->id}/inscription")
+             ->assertStatus(400)
+             ->assertJson([
+                 'message' => 'Vous avez atteint la limite de 5 formations simultanées. Veuillez vous désinscrire d\'une formation avant de vous inscrire à une nouvelle.'
+             ]);
+    }
+
     // ── Désinscription ──
 
     public function test_desinscription_sans_inscription()
